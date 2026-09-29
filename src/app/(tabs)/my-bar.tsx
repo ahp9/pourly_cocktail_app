@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
 
+import { normalizeCocktailData, searchCocktails } from "@/services/cocktails";
 import { Cocktail } from "@/types/cocktail";
-import { normalizeCocktailData, searchCocktails } from "../services/cocktails";
 
-export default function Profile() {
+export default function MyBar() {
   const [cocktail, setCocktail] = useState<Cocktail | null>(null);
   const [loading, setLoading] = useState(true);
 
