@@ -1,12 +1,13 @@
 import { Button } from "@/components/controls/Button";
+import { CircleButton } from "@/components/controls/CircleButton";
 import { AppText } from "@/components/primitivies/AppText";
 import { PressableScale } from "@/components/primitivies/PressableScale";
 import { INGREDIENTS } from "@/data/ingredients";
 import { useAuth } from "@/hooks/useAuth";
-import { getBarItems, type BarItem } from "@/services/bar";
-import { spacing } from "@/styles";
+import { getBarItems, removeFromBar, type BarItem } from "@/services/bar";
 import { colors, fonts, radius } from "@/styles/tokens";
 import type { BarCategory } from "@/types/bottle";
+import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
 import {
   ArrowRight,
@@ -14,10 +15,12 @@ import {
   ChevronRight,
   Plus,
   ScanLine,
+  X,
 } from "lucide-react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -45,6 +48,10 @@ export default function MyBar() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string>();
+  const [editing, setEditing] = useState(false);
+  // The last removed bottle, kept for a few seconds so it can be undone.
+  const [removed, setRemoved] = useState<BarItem | null>(null);
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // TODO: replace with your recipe matching against CocktailDB.
   const drinkCount: number | null = null;
@@ -78,6 +85,32 @@ export default function MyBar() {
     [items],
   );
 
+  const commit = async (item: BarItem) => {
+    if (!user) return;
+    try {
+      await removeFromBar(user.id, item.ingredient_name);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't remove it.");
+      load(); // put the list back in sync with the server
+    }
+  };
+
+  const remove = (item: BarItem) => {
+    // A second removal commits the first one straight away.
+    commit(item);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setItems((all) =>
+      all.filter((i) => i.ingredient_name !== item.ingredient_name),
+    );
+    setRemoved(item);
+  };
+
+  // Leaving the screen: stop editing. Pending deletes still go through.
+  useFocusEffect(useCallback(() => () => setEditing(false), []));
+  useEffect(() => {
+    if (items.length === 0) setEditing(false);
+  }, [items.length]);
+
   const addBottle = () => router.push("/add-bottle");
   const scan = () => router.push("/add-bottle/scan");
 
@@ -107,6 +140,33 @@ export default function MyBar() {
                 ? "1 ingredient"
                 : `${items.length} ingredients`}
             </AppText>
+          </View>
+          <View style={styles.headerActions}>
+            {items.length > 0 && (
+              <Pressable
+                onPress={() => setEditing((e) => !e)}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel={editing ? "Done editing" : "Edit bar"}
+                style={styles.editButton}
+              >
+                <AppText
+                  variant="label"
+                  color="amberLight"
+                  style={styles.semibold}
+                >
+                  {editing ? "Done" : "Edit"}
+                </AppText>
+              </Pressable>
+            )}
+            {!editing && (
+              <CircleButton
+                accessibilityLabel="Add a bottle"
+                onPress={addBottle}
+              >
+                <Plus size={22} color={colors.cream} strokeWidth={1.75} />
+              </CircleButton>
+            )}
           </View>
         </View>
 
@@ -215,6 +275,8 @@ export default function MyBar() {
                     key={item.ingredient_name}
                     label={labelFor(item)}
                     swatch={swatchFor(item.ingredient_name)}
+                    editing={editing}
+                    onRemove={() => remove(item)}
                   />
                 ))}
               </Grid>
@@ -227,14 +289,19 @@ export default function MyBar() {
 }
 
 // --- Small pieces used only here. Move to components/bar/ when reused. ---
-
-function InventoryTile({ label, swatch }: { label: string; swatch: string }) {
-  return (
-    <View
-      style={styles.tile}
-      accessible
-      accessibilityLabel={`${label}, in your bar`}
-    >
+function InventoryTile({
+  label,
+  swatch,
+  editing,
+  onRemove,
+}: {
+  label: string;
+  swatch: string;
+  editing: boolean;
+  onRemove: () => void;
+}) {
+  const body = (
+    <>
       <View style={[styles.swatch, { backgroundColor: swatch }]} />
       <AppText
         variant="label"
@@ -243,8 +310,38 @@ function InventoryTile({ label, swatch }: { label: string; swatch: string }) {
       >
         {label}
       </AppText>
-      <Check size={18} color={colors.amberLight} strokeWidth={1.75} />
-    </View>
+      {editing ? (
+        <View style={styles.removeBadge}>
+          <X size={14} color={colors.cream} strokeWidth={2.25} />
+        </View>
+      ) : (
+        <Check size={18} color={colors.amberLight} strokeWidth={1.75} />
+      )}
+    </>
+  );
+
+  if (!editing) {
+    return (
+      <View
+        style={styles.tile}
+        accessible
+        accessibilityLabel={`${label}, in your bar`}
+      >
+        {body}
+      </View>
+    );
+  }
+
+  // In edit mode the whole tile is the target, not just the small ×.
+  return (
+    <PressableScale
+      onPress={onRemove}
+      accessibilityRole="button"
+      accessibilityLabel={`Remove ${label}`}
+      style={[styles.tile, styles.tileEditing]}
+    >
+      {body}
+    </PressableScale>
   );
 }
 
@@ -305,7 +402,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: spacing.sp56,
+    marginTop: 16,
     marginBottom: 8,
   },
 
@@ -384,6 +481,32 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
   },
   swatch: { width: 8, height: 20, borderRadius: 3 },
+  tileEditing: { borderColor: "rgba(201, 69, 59, 0.45)" },
+  removeBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colors.campari,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 16 },
+  editButton: { minHeight: 44, justifyContent: "center" },
+  toast: {
+    position: "absolute",
+    left: 24,
+    right: 24,
+    bottom: 104, // above the tab bar
+    minHeight: 52,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    paddingHorizontal: 20,
+    borderRadius: radius.pill,
+    backgroundColor: colors.raised,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
 
   message: { alignItems: "center", gap: 12, marginTop: 32 },
 });

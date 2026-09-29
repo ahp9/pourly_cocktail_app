@@ -68,13 +68,6 @@ export default function AppTabs() {
           ),
         }}
       />
-
-      <Tabs.Screen
-        name="cocktail/[id]"
-        options={{
-          href: null,
-        }}
-      />
     </Tabs>
   );
 }

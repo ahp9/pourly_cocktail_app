@@ -55,3 +55,18 @@ export async function getBarItems(userId: string): Promise<BarItem[]> {
 
   return data ?? [];
 }
+
+export async function removeFromBar(
+  userId: string,
+  ingredient: string,
+): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase
+    .from("bar_items")
+    .delete()
+    .eq("user_id", userId)
+    .eq("ingredient_name", ingredient);
+
+  console.log("Supabase removeFromBar error:", error);
+  if (error) throw new Error("Couldn't remove it. Try again.");
+}
