@@ -16,8 +16,7 @@ export async function getProfile(
       .from("taste_personality")
       .select("name, description, drinks_rated, updated_at")
       .eq("user_id", user.id)
-      .maybeSingle()
-      .abortSignal(signal),
+      .maybeSingle(),
     supabase
       .from("profile_recommendations")
       .select("cocktail_id, cocktail_name, needs, match, accent")

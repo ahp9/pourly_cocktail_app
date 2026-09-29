@@ -68,9 +68,10 @@ function RootStack() {
     >
       <Stack.Protected guard={signedIn}>
         <Stack.Screen name="(tabs)" />
-        {/* Full-screen flows without the nav bar go here too, e.g.
-            <Stack.Screen name="mood" />
-            <Stack.Screen name="recommendation" /> */}
+        <Stack.Screen
+          name="add-bottle"
+          options={{ presentation: "fullScreenModal" }}
+        />
       </Stack.Protected>
 
       <Stack.Protected guard={!signedIn}>

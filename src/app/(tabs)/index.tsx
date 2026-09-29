@@ -43,7 +43,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    padding: spacing.sp24,
     justifyContent: "flex-start",
   },
 
@@ -55,11 +55,6 @@ const styles = StyleSheet.create({
   content: {
     marginTop: 24,
     alignItems: "center",
-  },
-
-  subtitle: {
-    fontSize: 18,
-    color: "#666",
   },
 
   title: {
