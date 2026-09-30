@@ -1,22 +1,20 @@
+import { StatCard } from "@/components/bar/StatCard";
 import { Button } from "@/components/controls/Button";
-import { CircleButton } from "@/components/controls/CircleButton";
+import { FeatureTile } from "@/components/controls/Tile/FeatureTile";
+import { InventoryTile } from "@/components/controls/Tile/InventoryTile";
+import { Grid } from "@/components/forms/Grid";
+import { Header } from "@/components/layout/Header";
 import { AppText } from "@/components/primitivies/AppText";
-import { PressableScale } from "@/components/primitivies/PressableScale";
+import { NavRow } from "@/components/primitivies/NavRow";
 import { INGREDIENTS } from "@/data/ingredients";
 import { useAuth } from "@/hooks/useAuth";
 import { getBarItems, removeFromBar, type BarItem } from "@/services/bar";
-import { colors, fonts, radius } from "@/styles/tokens";
+import { colors, spacing } from "@/styles";
+import { fonts, radius } from "@/styles/tokens";
 import type { BarCategory } from "@/types/bottle";
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
-import {
-  ArrowRight,
-  Check,
-  ChevronRight,
-  Plus,
-  ScanLine,
-  X,
-} from "lucide-react-native";
+import { Plus, ScanLine } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -129,90 +127,46 @@ export default function MyBar() {
           />
         }
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={{ gap: 4 }}>
-            <AppText variant="display" accessibilityRole="header">
-              My Bar
-            </AppText>
-            <AppText variant="body" color="cream2">
-              {items.length === 1
-                ? "1 ingredient"
-                : `${items.length} ingredients`}
-            </AppText>
-          </View>
-          <View style={styles.headerActions}>
-            {items.length > 0 && (
-              <Pressable
-                onPress={() => setEditing((e) => !e)}
-                hitSlop={12}
-                accessibilityRole="button"
-                accessibilityLabel={editing ? "Done editing" : "Edit bar"}
-                style={styles.editButton}
-              >
-                <AppText
-                  variant="label"
-                  color="amberLight"
-                  style={styles.semibold}
+        <Header
+          title="My Bar"
+          subtitle={
+            items.length === 1 ? "1 ingredient" : `${items.length} ingredients`
+          }
+          actions={
+            <>
+              {items.length > 0 && (
+                <Pressable
+                  onPress={() => setEditing((e) => !e)}
+                  hitSlop={12}
+                  accessibilityRole="button"
+                  accessibilityLabel={editing ? "Done editing" : "Edit bar"}
+                  style={styles.editButton}
                 >
-                  {editing ? "Done" : "Edit"}
-                </AppText>
-              </Pressable>
-            )}
-            {!editing && (
-              <CircleButton
-                accessibilityLabel="Add a bottle"
-                onPress={addBottle}
-              >
-                <Plus size={22} color={colors.cream} strokeWidth={1.75} />
-              </CircleButton>
-            )}
-          </View>
-        </View>
+                  <AppText
+                    variant="label"
+                    color="amberLight"
+                    style={styles.semibold}
+                  >
+                    {editing ? "Done" : "Edit"}
+                  </AppText>
+                </Pressable>
+              )}
+            </>
+          }
+        />
 
         {/* Drink count */}
-        <View style={styles.statCard}>
-          <View style={{ flex: 1, gap: 4 }}>
-            <AppText variant="label" color="cream2">
-              {drinkCount ? "You can currently make" : "Add bottles to see"}
-            </AppText>
-            <AppText variant="title">
-              {drinkCount ? `${drinkCount} cocktails.` : "what you can make."}
-            </AppText>
-          </View>
-          {drinkCount ? (
-            <PressableScale
-              onPress={() => router.push("/discover")}
-              accessibilityRole="button"
-              accessibilityLabel={`See the ${drinkCount} cocktails you can make`}
-              style={styles.statArrow}
-            >
-              <ArrowRight size={22} color={colors.onAmber} strokeWidth={1.75} />
-            </PressableScale>
-          ) : null}
-        </View>
+        <StatCard drinkCount={drinkCount} />
 
-        {/* Scan bottles */}
-        <PressableScale
-          onPress={scan}
-          accessibilityRole="button"
-          accessibilityLabel="Scan bottles"
+        <NavRow
+          title="Scan bottles"
+          subtitle="Point your camera at your shelf"
+          href="/add-bottle/scan"
           accessibilityHint="Opens the camera to read a barcode or label"
-          style={styles.scanRow}
-        >
-          <View style={styles.scanIcon}>
+          icon={
             <ScanLine size={22} color={colors.amberLight} strokeWidth={1.75} />
-          </View>
-          <View style={{ flex: 1, gap: 2 }}>
-            <AppText variant="label" style={styles.semibold}>
-              Scan bottles
-            </AppText>
-            <AppText variant="caption" color="muted">
-              Point your camera at your shelf
-            </AppText>
-          </View>
-          <ChevronRight size={22} color={colors.muted} strokeWidth={1.75} />
-        </PressableScale>
+          }
+        />
 
         <Button
           label="Add ingredient"
@@ -228,12 +182,12 @@ export default function MyBar() {
           <View style={styles.tiles}>
             <FeatureTile
               title="Almost"
-              glow={colors.campari}
+              glow={colors.drink.campari}
               body="Drinks you're one bottle away from"
             />
             <FeatureTile
               title="Use it up"
-              glow={colors.aperol}
+              glow={colors.drink.aperol}
               body="Finish what's been open too long"
             />
           </View>
@@ -288,209 +242,21 @@ export default function MyBar() {
   );
 }
 
-// --- Small pieces used only here. Move to components/bar/ when reused. ---
-function InventoryTile({
-  label,
-  swatch,
-  editing,
-  onRemove,
-}: {
-  label: string;
-  swatch: string;
-  editing: boolean;
-  onRemove: () => void;
-}) {
-  const body = (
-    <>
-      <View style={[styles.swatch, { backgroundColor: swatch }]} />
-      <AppText
-        variant="label"
-        numberOfLines={1}
-        style={[styles.semibold, { flex: 1 }]}
-      >
-        {label}
-      </AppText>
-      {editing ? (
-        <View style={styles.removeBadge}>
-          <X size={14} color={colors.cream} strokeWidth={2.25} />
-        </View>
-      ) : (
-        <Check size={18} color={colors.amberLight} strokeWidth={1.75} />
-      )}
-    </>
-  );
-
-  if (!editing) {
-    return (
-      <View
-        style={styles.tile}
-        accessible
-        accessibilityLabel={`${label}, in your bar`}
-      >
-        {body}
-      </View>
-    );
-  }
-
-  // In edit mode the whole tile is the target, not just the small ×.
-  return (
-    <PressableScale
-      onPress={onRemove}
-      accessibilityRole="button"
-      accessibilityLabel={`Remove ${label}`}
-      style={[styles.tile, styles.tileEditing]}
-    >
-      {body}
-    </PressableScale>
-  );
-}
-
-function FeatureTile({
-  title,
-  body,
-  glow,
-}: {
-  title: string;
-  body: string;
-  glow: string;
-}) {
-  return (
-    <View style={styles.feature}>
-      <View style={[styles.featureGlow, { backgroundColor: glow }]} />
-      <AppText variant="title" style={styles.featureTitle}>
-        {title}
-      </AppText>
-      <AppText variant="caption" color="cream2">
-        {body}
-      </AppText>
-    </View>
-  );
-}
-
-// Two columns; an odd last item keeps its half width.
-function Grid({ children }: { children: React.ReactNode[] }) {
-  const rows: React.ReactNode[][] = [];
-  for (let i = 0; i < children.length; i += 2)
-    rows.push(children.slice(i, i + 2));
-  return (
-    <View style={{ gap: 8 }}>
-      {rows.map((row, i) => (
-        <View key={i} style={{ flexDirection: "row", gap: 8 }}>
-          {row.map((child, j) => (
-            <View key={j} style={{ flex: 1 }}>
-              {child}
-            </View>
-          ))}
-          {row.length === 1 && <View style={{ flex: 1 }} />}
-        </View>
-      ))}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.ground },
   content: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 120,
-    gap: 16,
+    paddingHorizontal: spacing.sp24,
+    paddingTop: spacing.sp16,
+    paddingBottom: spacing.sp120,
+    gap: spacing.sp16,
   },
   semibold: { fontFamily: fonts.sans600 },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-
-  statCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    padding: 24,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
-  statArrow: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.amber,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  scanRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    padding: 16,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.amberDeep,
-  },
-  scanIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.thumb,
-    backgroundColor: colors.raised,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
   tiles: { flexDirection: "row", gap: 8, marginTop: 16 },
-  feature: {
-    flex: 1,
-    minHeight: 136,
-    padding: 16,
-    gap: 16,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-    overflow: "hidden",
-  },
-  featureGlow: {
-    position: "absolute",
-    top: -40,
-    right: -40,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    opacity: 0.25,
-  },
-  featureTitle: { fontSize: 32, lineHeight: 36 },
 
   section: { gap: 12, marginTop: 16 },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between" },
-  tile: {
-    height: 52,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 16,
-    borderRadius: radius.tile,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
-  swatch: { width: 8, height: 20, borderRadius: 3 },
-  tileEditing: { borderColor: "rgba(201, 69, 59, 0.45)" },
-  removeBadge: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: colors.campari,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerActions: { flexDirection: "row", alignItems: "center", gap: 16 },
+
   editButton: { minHeight: 44, justifyContent: "center" },
   toast: {
     position: "absolute",

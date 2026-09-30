@@ -1,78 +1,118 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { MintGlass } from "@/components/images/ming-glass";
-import { spacing, typography } from "@/styles";
+import { Glitter } from "@/components/animation/Glitter";
+import { Button } from "@/components/controls/Button";
+import { Icon } from "@/components/icon";
+import { MintGlass } from "@/components/images/MintGlass";
+import { Header } from "@/components/layout/Header";
+import { NavRow } from "@/components/primitivies/NavRow";
+import { useProfile } from "@/hooks/useProfile";
+import { colors, spacing, typography } from "@/styles";
+import { router } from "expo-router";
+import { Path } from "react-native-svg";
 
 export default function Index() {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadCocktail() {
-      try {
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadCocktail();
-  }, []);
+  const { profile, loading, refreshing, error, refetch } = useProfile();
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.safe}>
         <ActivityIndicator />
       </View>
     );
   }
 
+  const reroute = () => router.push("/my-bar");
+
   return (
-    <View style={styles.container}>
-      <View style={styles.hero}>
-        <MintGlass width={250} height={250} />
-      </View>
-      <View style={styles.content}>
-        <Text style={styles.title}>What are we drinking?</Text>
-      </View>
-    </View>
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refetch}
+            tintColor={colors.amber}
+          />
+        }
+      >
+        <Header title="Pourly" />
+
+        <View style={styles.hero}>
+          <View
+            style={{
+              height: 200,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Glitter height={200} />
+            <MintGlass width={200} height={200} />
+          </View>
+          <Text style={styles.title}>What are we drinking?</Text>
+        </View>
+        <NavRow
+          title="My Bar"
+          subtitle="Ingredients * Drinks"
+          href="/my-bar"
+          accessibilityHint="Reroutes to the My Bar screen where you can view your ingredients and drinks."
+          icon={
+            <Icon color={colors.amber}>
+              <Path d="M10 3h4v4l2 3v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10l2-3z" />
+              <Path d="M8 14h8" />
+            </Icon>
+          }
+          variant="flat"
+        />
+
+        <View style={styles.actions}>
+          <Button
+            label="Make a drink"
+            onPress={() => router.push("/create-drink/index")}
+          />
+          <Button
+            label="Surprise me"
+            onPress={() => router.push("/create-drink/surprise")}
+            variant="secondary"
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: spacing.sp24,
-    justifyContent: "flex-start",
+  safe: { flex: 1, backgroundColor: colors.ground },
+  content: {
+    paddingHorizontal: spacing.sp24,
+    paddingTop: spacing.sp16,
+    paddingBottom: spacing.sp120,
+    gap: spacing.sp16,
   },
 
   hero: {
-    alignItems: "center",
-    marginTop: spacing.sp56,
-  },
-
-  content: {
-    marginTop: 24,
     alignItems: "center",
   },
 
   title: {
     fontSize: typography.display.fontSize,
-    marginBottom: 12,
+    marginBottom: spacing.sp8,
     color: typography.display.color,
     fontFamily: typography.display.fontFamily,
   },
 
-  ingredient: {
-    fontSize: 18,
-    marginBottom: 4,
-    color: "#555",
-  },
-
-  instructions: {
-    marginTop: 20,
-    lineHeight: 22,
-    color: "#666",
+  actions: {
+    display: "flex",
+    flexDirection: "row",
+    gap: spacing.sp16,
+    marginTop: spacing.sp16,
   },
 });

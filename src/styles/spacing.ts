@@ -9,6 +9,7 @@ export const spacing = {
   sp32: 32,
   sp40: 40,
   sp56: 56,
+  sp120: 120,
 } as const;
 
 /** Layout rules from the spec. */

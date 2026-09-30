@@ -1,4 +1,5 @@
 import { Button } from "@/components/controls/Button";
+import { Header } from "@/components/layout/Header";
 import { AppText } from "@/components/primitivies/AppText";
 import { useProfile } from "@/hooks/useProfile";
 import { colors, spacing } from "@/styles";
@@ -47,10 +48,10 @@ export default function ProfileScreen() {
           />
         }
       >
-        <AppText variant="display">Your taste</AppText>
-        <AppText variant="body" color="cream2">
-          Pourly is learning what you like.
-        </AppText>
+        <Header
+          title="Your taste"
+          subtitle="Pourly is learning what you like."
+        />
 
         {profile.taste.length > 0 ? (
           profile.taste.map((t) => (
@@ -95,12 +96,17 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.ground, marginTop: spacing.sp56 },
+  safe: { flex: 1, backgroundColor: colors.ground },
+  content: {
+    paddingHorizontal: spacing.sp24,
+    paddingTop: spacing.sp16,
+    paddingBottom: spacing.sp120,
+    gap: spacing.sp16,
+  },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.ground,
   },
-  content: { paddingHorizontal: 24, paddingBottom: 120, gap: 12 },
 });
