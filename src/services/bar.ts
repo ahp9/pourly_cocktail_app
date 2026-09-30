@@ -1,10 +1,6 @@
 import { supabase } from "@/services/supabase";
 import type { Product } from "@/types/bottle";
 
-// Adds the confirmed bottle to the user's bar.
-// With Supabase configured it writes a row to `bar_items`.
-// Without it, it's a no-op so the flow still works while you build.
-// Wire `onAdded` in the confirm screen to your own My Bar state (useBar).
 export async function addToBar(
   userId: string,
   product: Product,
@@ -15,29 +11,69 @@ export async function addToBar(
 
   if (!supabase) return;
 
-  const { error } = await supabase.from("bar_items").upsert(
-    {
-      user_id: userId,
-      ingredient_name: product.ingredient.name,
-      category: product.ingredient.category,
-      product_name: product.productName,
-      barcode: product.barcode ?? null,
-    },
-    {
-      onConflict: "user_id,ingredient_name",
-    },
-  );
+  const { data: existing, error: lookupError } = await supabase
+    .from("bar_items")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("ingredient_name", product.ingredient.name)
+    .maybeSingle();
+
+  if (lookupError) {
+    console.error("Supabase addToBar lookup error:", lookupError);
+    throw new Error("Couldn't add it to your bar. Try again.");
+  }
+
+  const productData = {
+    category: product.ingredient.category,
+    product_name: product.productName,
+    barcode: product.barcode ?? null,
+    brand: product.brand ?? null,
+    alcohol_type: product.alcoholType ?? null,
+    alcohol_percent: product.abv ?? null,
+    inital_volume_ml: product.volumeMl ?? null,
+  };
+
+  if (existing) {
+    const { error } = await supabase
+      .from("bar_items")
+      .update(productData)
+      .eq("id", existing.id);
+
+    if (error) {
+      console.error("Supabase addToBar update error:", error);
+      throw new Error("Couldn't update your bar. Try again.");
+    }
+
+    return;
+  }
+
+  const { error } = await supabase.from("bar_items").insert({
+    user_id: userId,
+    ingredient_name: product.ingredient.name,
+    quantity: 1,
+    ...productData,
+  });
 
   if (error) {
-    console.error("Supabase addToBar error:", error);
+    console.error("Supabase addToBar insert error:", error);
     throw new Error("Couldn't add it to your bar. Try again.");
   }
 }
 
 export type BarItem = {
+  id: string;
+
   ingredient_name: string;
-  category: string;
+  category: string | null;
+
+  quantity: number | null;
+
   product_name: string | null;
+  barcode: string | null;
+  brand: string | null;
+  alcohol_type: string | null;
+  alcohol_percent: number | null;
+  inital_volume_ml: number | null;
 };
 
 export async function getBarItems(userId: string): Promise<BarItem[]> {
@@ -45,11 +81,25 @@ export async function getBarItems(userId: string): Promise<BarItem[]> {
 
   const { data, error } = await supabase
     .from("bar_items")
-    .select("ingredient_name, category, product_name")
+    .select(
+      `
+      id,
+      ingredient_name,
+      category,
+      quantity,
+      product_name,
+      barcode,
+      brand,
+      alcohol_type,
+      alcohol_percent,
+      inital_volume_ml
+    `,
+    )
     .eq("user_id", userId)
     .order("created_at");
 
   if (error) {
+    console.error("Supabase getBarItems error:", error);
     throw new Error("Couldn't load your bar.");
   }
 
@@ -58,15 +108,18 @@ export async function getBarItems(userId: string): Promise<BarItem[]> {
 
 export async function removeFromBar(
   userId: string,
-  ingredient: string,
+  barItemId: string,
 ): Promise<void> {
   if (!supabase) return;
+
   const { error } = await supabase
     .from("bar_items")
     .delete()
     .eq("user_id", userId)
-    .eq("ingredient_name", ingredient);
+    .eq("id", barItemId);
 
-  console.log("Supabase removeFromBar error:", error);
-  if (error) throw new Error("Couldn't remove it. Try again.");
+  if (error) {
+    console.error("Supabase removeFromBar error:", error);
+    throw new Error("Couldn't remove it. Try again.");
+  }
 }

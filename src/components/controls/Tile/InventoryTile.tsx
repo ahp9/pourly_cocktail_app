@@ -1,22 +1,35 @@
 import { Check, X } from "lucide-react-native";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { PopUp } from "@/components/pop-up/PopUp";
 import { AppText } from "@/components/primitivies/AppText";
 import { PressableScale } from "@/components/primitivies/PressableScale";
+import { BarItem } from "@/services/bar";
 import { colors, spacing } from "@/styles";
 import { fonts, radius } from "@/styles/tokens";
 
 export function InventoryTile({
   label,
+  item,
   swatch,
   editing,
   onRemove,
+  category,
+  abv,
+  description,
 }: {
   label: string;
+  item: BarItem;
   swatch: string;
   editing: boolean;
   onRemove: () => void;
+  category?: string;
+  abv?: number;
+  description?: string;
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
   const body = (
     <>
       <View style={[styles.swatch, { backgroundColor: swatch }]} />
@@ -37,27 +50,42 @@ export function InventoryTile({
     </>
   );
 
-  if (!editing) {
+  if (editing) {
     return (
-      <View
-        style={styles.tile}
-        accessible
-        accessibilityLabel={`${label}, in your bar`}
+      <PressableScale
+        onPress={onRemove}
+        accessibilityRole="button"
+        accessibilityLabel={`Remove ${label}`}
+        style={[styles.tile, styles.tileEditing]}
       >
         {body}
-      </View>
+      </PressableScale>
     );
   }
 
+  const meta = [category, abv != null ? `${abv}% ABV` : undefined]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <PressableScale
-      onPress={onRemove}
-      accessibilityRole="button"
-      accessibilityLabel={`Remove ${label}`}
-      style={[styles.tile, styles.tileEditing]}
-    >
-      {body}
-    </PressableScale>
+    <>
+      <PressableScale
+        onPress={() => setDetailsOpen(true)}
+        accessibilityRole="button"
+        accessibilityLabel={`${label}, in your bar`}
+        accessibilityHint="Shows details"
+        style={styles.tile}
+      >
+        {body}
+      </PressableScale>
+
+      <PopUp
+        visible={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        item={item}
+        swatch={swatch}
+      />
+    </>
   );
 }
 

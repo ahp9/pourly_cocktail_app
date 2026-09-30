@@ -37,6 +37,7 @@ const swatchFor = (ingredient: string) =>
   INGREDIENTS.find((i) => i.name === ingredient)?.swatch ?? colors.muted;
 
 const labelFor = (item: BarItem) =>
+  item.product_name ??
   INGREDIENTS.find((i) => i.name === item.ingredient_name)?.label ??
   item.ingredient_name;
 
@@ -85,21 +86,22 @@ export default function MyBar() {
 
   const commit = async (item: BarItem) => {
     if (!user) return;
+
     try {
-      await removeFromBar(user.id, item.ingredient_name);
+      await removeFromBar(user.id, item.id);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't remove it.");
-      load(); // put the list back in sync with the server
+      load();
     }
   };
 
   const remove = (item: BarItem) => {
-    // A second removal commits the first one straight away.
     commit(item);
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setItems((all) =>
-      all.filter((i) => i.ingredient_name !== item.ingredient_name),
-    );
+
+    setItems((all) => all.filter((i) => i.id !== item.id));
+
     setRemoved(item);
   };
 
@@ -227,6 +229,7 @@ export default function MyBar() {
                 {section.data.map((item) => (
                   <InventoryTile
                     key={item.ingredient_name}
+                    item={item}
                     label={labelFor(item)}
                     swatch={swatchFor(item.ingredient_name)}
                     editing={editing}

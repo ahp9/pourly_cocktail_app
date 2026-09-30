@@ -14,15 +14,41 @@ import { Icon } from "@/components/icon";
 import { MintGlass } from "@/components/images/MintGlass";
 import { Header } from "@/components/layout/Header";
 import { NavRow } from "@/components/primitivies/NavRow";
+import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { BarItem, getBarItems } from "@/services/bar";
 import { colors, spacing, typography } from "@/styles";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Path } from "react-native-svg";
 
 export default function Index() {
+  const { user } = useAuth();
   const { profile, loading, refreshing, error, refetch } = useProfile();
+  const [items, setItems] = useState<BarItem[]>([]);
+  const [error_drinks, setError] = useState<string>();
+  const [loading_drinks, setLoading] = useState(true);
 
-  if (loading) {
+  const load = useCallback(async () => {
+    if (!user) return;
+    try {
+      setError(undefined);
+      setItems(await getBarItems(user.id));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't load your bar.");
+    } finally {
+      setLoading(false);
+      refetch();
+    }
+  }, [user]);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
+
+  if (loading_drinks || loading) {
     return (
       <View style={styles.safe}>
         <ActivityIndicator />
@@ -61,7 +87,7 @@ export default function Index() {
         </View>
         <NavRow
           title="My Bar"
-          subtitle="Ingredients * Drinks"
+          subtitle={`${items.length || 0} Ingredients • Drinks`}
           href="/my-bar"
           accessibilityHint="Reroutes to the My Bar screen where you can view your ingredients and drinks."
           icon={
@@ -76,7 +102,7 @@ export default function Index() {
         <View style={styles.actions}>
           <Button
             label="Make a drink"
-            onPress={() => router.push("/create-drink/index")}
+            onPress={() => router.push("/create-drink")}
           />
           <Button
             label="Surprise me"
