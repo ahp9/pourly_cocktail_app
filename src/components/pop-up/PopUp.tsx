@@ -44,7 +44,7 @@ export function PopUp({
               style={[styles.title, { flex: 1 }]}
               accessibilityRole="header"
             >
-              {item.product_name ?? item.ingredient_name}
+              {item.product_name ?? item.label}
             </AppText>
             <Pressable
               onPress={onClose}

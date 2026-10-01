@@ -6,12 +6,12 @@ import { Grid } from "@/components/forms/Grid";
 import { Header } from "@/components/layout/Header";
 import { AppText } from "@/components/primitivies/AppText";
 import { NavRow } from "@/components/primitivies/NavRow";
-import { INGREDIENTS } from "@/data/ingredients";
 import { useAuth } from "@/hooks/useAuth";
 import { getBarItems, removeFromBar, type BarItem } from "@/services/bar";
+import { alcoholTypeLabel, loadCatalog } from "@/services/catalog";
 import { colors, spacing } from "@/styles";
 import { fonts, radius } from "@/styles/tokens";
-import type { BarCategory } from "@/types/bottle";
+import { BAR_CATEGORIES } from "@/types/bottle";
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
 import { Plus, ScanLine } from "lucide-react-native";
@@ -26,20 +26,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const SECTIONS: { key: BarCategory; title: string }[] = [
-  { key: "spirits", title: "Spirits" },
-  { key: "liqueurs", title: "Liqueurs" },
-  { key: "mixers", title: "Mixers" },
-  { key: "fresh", title: "Fresh" },
-];
-
-const swatchFor = (ingredient: string) =>
-  INGREDIENTS.find((i) => i.name === ingredient)?.swatch ?? colors.muted;
-
-const labelFor = (item: BarItem) =>
-  item.product_name ??
-  INGREDIENTS.find((i) => i.name === item.ingredient_name)?.label ??
-  item.ingredient_name;
+const labelFor = (item: BarItem) => item.product_name ?? item.label;
 
 export default function MyBar() {
   const { user } = useAuth();
@@ -59,7 +46,9 @@ export default function MyBar() {
     if (!user) return;
     try {
       setError(undefined);
-      setItems(await getBarItems(user.id));
+      // The catalog has the labels for alcohol types added in the database.
+      const [bar] = await Promise.all([getBarItems(user.id), loadCatalog()]);
+      setItems(bar);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't load your bar.");
     } finally {
@@ -77,7 +66,7 @@ export default function MyBar() {
 
   const sections = useMemo(
     () =>
-      SECTIONS.map((s) => ({
+      BAR_CATEGORIES.map((s) => ({
         ...s,
         data: items.filter((i) => i.category === s.key),
       })).filter((s) => s.data.length > 0),
@@ -228,10 +217,12 @@ export default function MyBar() {
               <Grid>
                 {section.data.map((item) => (
                   <InventoryTile
-                    key={item.ingredient_name}
+                    key={item.id}
                     item={item}
                     label={labelFor(item)}
-                    swatch={swatchFor(item.ingredient_name)}
+                    swatch={item.swatch}
+                    category={alcoholTypeLabel(item.alcohol_type)}
+                    abv={item.abv ?? undefined}
                     editing={editing}
                     onRemove={() => remove(item)}
                   />

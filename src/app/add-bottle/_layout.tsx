@@ -17,6 +17,7 @@ export default function AddBottleLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="scan" options={{ animation: "fade" }} />
         <Stack.Screen name="confirm" />
+        <Stack.Screen name="new-ingredient" />
       </Stack>
     </AddBottleProvider>
   );

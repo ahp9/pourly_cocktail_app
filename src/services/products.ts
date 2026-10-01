@@ -1,4 +1,8 @@
-import { normalizeIngredient } from "@/data/ingredients";
+import {
+  ingredientByKey,
+  loadCatalog,
+  normalizeIngredient,
+} from "@/services/catalog";
 import { supabase } from "@/services/supabase";
 import type { Product } from "@/types/bottle";
 
@@ -13,6 +17,8 @@ const OFF_FIELDS =
 export async function identifyByBarcode(
   barcode: string,
 ): Promise<Product | null> {
+  // Make sure ingredients people added can be matched too.
+  await loadCatalog();
   const known = await fromSupabase(barcode);
   if (known) return known;
   return fromOpenFoodFacts(barcode);
@@ -31,9 +37,8 @@ async function fromSupabase(barcode: string): Promise<Product | null> {
     barcode: data.barcode,
     brand: data.brand ?? undefined,
     productName: data.product_name,
-    alcoholType: data.alcohol_type ?? undefined,
-    ingredient: data.cocktail_ingredient
-      ? normalizeIngredient(data.cocktail_ingredient)
+    ingredient: data.ingredient_key
+      ? ingredientByKey(data.ingredient_key)
       : null,
     abv: data.abv ?? undefined,
     volumeMl: data.volume_ml ?? undefined,
@@ -72,7 +77,6 @@ async function fromOpenFoodFacts(barcode: string): Promise<Product | null> {
       barcode,
       brand: p.brands?.split(",")[0]?.trim(),
       productName: p.product_name,
-      alcoholType: categories.at(-1),
       ingredient: normalizeIngredient(searchable),
       abv: p.nutriments?.alcohol_100g ?? p.nutriments?.alcohol,
       volumeMl: parseVolume(p.quantity ?? ""),
@@ -117,7 +121,6 @@ export function identifyByLabel(lines: string[], barcode?: string): Product {
     barcode,
     brand: nameLines[0] ? toTitle(nameLines[0]) : undefined,
     productName,
-    alcoholType: ingredient?.label,
     ingredient,
     abv: abv !== undefined && abv > 0 && abv < 96 ? abv : undefined,
     volumeMl,
@@ -135,8 +138,7 @@ export async function saveProduct(p: Product): Promise<void> {
       barcode: p.barcode,
       brand: p.brand ?? null,
       product_name: p.productName,
-      alcohol_type: p.alcoholType ?? null,
-      cocktail_ingredient: p.ingredient.name,
+      ingredient_key: p.ingredient.key,
       abv: p.abv ?? null,
       volume_ml: p.volumeMl ?? null,
       image_url: p.imageUrl ?? null,

@@ -3,10 +3,11 @@ import { CircleButton } from "@/components/controls/CircleButton";
 import { TextField } from "@/components/forms/TextField";
 import { AppText } from "@/components/primitivies/AppText";
 import { PressableScale } from "@/components/primitivies/PressableScale";
-import { searchIngredients } from "@/data/ingredients";
 import { useAddBottle } from "@/hooks/useAddBottle";
+import { useBarCatalog } from "@/hooks/useBarCatalog";
+import { hasIngredientNamed, searchIngredients } from "@/services/catalog";
 import { colors, radius } from "@/styles/tokens";
-import type { BarCategory, Ingredient } from "@/types/bottle";
+import { BAR_CATEGORIES, type Ingredient } from "@/types/bottle";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ChevronLeft,
@@ -19,13 +20,6 @@ import { useMemo, useState } from "react";
 import { SectionList, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const SECTION_TITLES: Record<BarCategory, string> = {
-  spirits: "Spirits",
-  liqueurs: "Liqueurs",
-  mixers: "Mixers",
-  fresh: "Fresh",
-};
-
 // Two modes:
 //  /add-bottle            -> start of the flow: scan card + manual search
 //  /add-bottle?mode=pick  -> "Change" from the confirm screen: pick an ingredient
@@ -34,24 +28,34 @@ export default function AddBottle() {
   const picking = mode === "pick";
   const { draft, setDraft } = useAddBottle();
   const [query, setQuery] = useState("");
+  // Re-renders when ingredients people added have loaded.
+  const catalog = useBarCatalog();
 
   const sections = useMemo(() => {
     const results = searchIngredients(query);
-    return (Object.keys(SECTION_TITLES) as BarCategory[])
-      .map((c) => ({
-        title: SECTION_TITLES[c],
-        data: results.filter((i) => i.category === c),
-      }))
-      .filter((s) => s.data.length > 0);
-  }, [query]);
+    return BAR_CATEGORIES.map((c) => ({
+      title: c.title,
+      data: results.filter((i) => i.category === c.key),
+    })).filter((s) => s.data.length > 0);
+    // `catalog` changes when the list loads or someone adds an ingredient.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, catalog]);
+
+  // Not in the list? Offer to add it, prefilled with what they typed.
+  const typed = query.trim();
+  const canAdd = typed.length >= 2 && !hasIngredientNamed(typed);
+  const addNew = () =>
+    router.push({
+      pathname: "/add-bottle/new-ingredient",
+      params: {
+        ...(canAdd ? { name: typed } : {}),
+        ...(picking ? { mode: "pick" } : {}),
+      },
+    });
 
   const choose = (ingredient: Ingredient) => {
     if (picking && draft) {
-      setDraft({
-        ...draft,
-        ingredient,
-        alcoholType: draft.alcoholType ?? ingredient.label,
-      });
+      setDraft({ ...draft, ingredient });
       router.back();
       return;
     }
@@ -66,7 +70,7 @@ export default function AddBottle() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <SectionList
         sections={sections}
-        keyExtractor={(i) => i.name}
+        keyExtractor={(i) => i.key}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         stickySectionHeadersEnabled={false}
@@ -149,7 +153,7 @@ export default function AddBottle() {
           <IngredientRow
             label={item.label}
             swatch={item.swatch}
-            selected={picking && draft?.ingredient?.name === item.name}
+            selected={picking && draft?.ingredient?.key === item.key}
             onPress={() => choose(item)}
             trailing={
               <Plus size={20} color={colors.muted} strokeWidth={1.75} />
@@ -164,8 +168,21 @@ export default function AddBottle() {
             align="center"
             style={{ marginTop: 24 }}
           >
-            Nothing called “{query}”. Try a shorter word.
+            Nothing called “{typed}” yet.
           </AppText>
+        }
+        ListFooterComponent={
+          <View style={styles.footer}>
+            <IngredientRow
+              label={canAdd ? `Add “${typed}”` : "Add something new"}
+              caption="Not in the list? Add it so you can use it."
+              onPress={addNew}
+              accessibilityHint="Opens a form to add a new ingredient"
+              trailing={
+                <Plus size={20} color={colors.amberLight} strokeWidth={1.75} />
+              }
+            />
+          </View>
         }
       />
     </SafeAreaView>
@@ -196,4 +213,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   sectionTitle: { marginTop: 24, marginBottom: 12 },
+  footer: { marginTop: 24 },
 });

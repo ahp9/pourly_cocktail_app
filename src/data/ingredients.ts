@@ -1,214 +1,441 @@
-import type { BarCategory, Ingredient } from "@/types/bottle";
+// The built-in bar list: what ships with the app.
+//
+// The live list is the `ingredients` table (rows with a bar_category), which
+// also holds ingredients people add themselves. This file is
+//   - the starting data: the cocktail import copies shelf, alcohol type,
+//     label and swatch from here into the table, and
+//   - the offline fallback, until src/services/catalog.ts has loaded the table.
+// The regexes only live here. Ingredients people add are matched by name.
 
-type Entry = Ingredient & { match: RegExp };
+import type {
+  AlcoholTypeOption,
+  BarCategory,
+  Ingredient,
+} from "@/types/bottle";
 
+// Starting rows of the `alcohol_types` table (same keys as the migration).
+// Add new types as rows in the table; add them here too if a built-in
+// ingredient below needs one.
+export const BUILT_IN_ALCOHOL_TYPES = [
+  { key: "vodka", label: "Vodka", category: "spirits" },
+  { key: "gin", label: "Gin", category: "spirits" },
+  { key: "rum", label: "Rum", category: "spirits" },
+  { key: "tequila", label: "Tequila", category: "spirits" },
+  { key: "mezcal", label: "Mezcal", category: "spirits" },
+  { key: "whiskey", label: "Whiskey", category: "spirits" },
+  { key: "brandy", label: "Brandy", category: "spirits" },
+  { key: "cachaca", label: "Cachaça", category: "spirits" },
+  { key: "pisco", label: "Pisco", category: "spirits" },
+  { key: "aquavit", label: "Aquavit", category: "spirits" },
+  { key: "absinthe", label: "Absinthe", category: "spirits" },
+  { key: "other_spirit", label: "Other spirit", category: "spirits" },
+  { key: "orange_liqueur", label: "Orange liqueur", category: "liqueurs" },
+  { key: "fruit_liqueur", label: "Fruit liqueur", category: "liqueurs" },
+  { key: "herbal_liqueur", label: "Herbal liqueur", category: "liqueurs" },
+  { key: "cream_liqueur", label: "Cream liqueur", category: "liqueurs" },
+  { key: "coffee_liqueur", label: "Coffee liqueur", category: "liqueurs" },
+  { key: "nut_liqueur", label: "Nut liqueur", category: "liqueurs" },
+  { key: "anise_liqueur", label: "Anise liqueur", category: "liqueurs" },
+  { key: "bitter_aperitif", label: "Bitter aperitif", category: "liqueurs" },
+  { key: "amaro", label: "Amaro", category: "liqueurs" },
+  { key: "other_liqueur", label: "Other liqueur", category: "liqueurs" },
+  { key: "sparkling_wine", label: "Sparkling wine", category: "wine" },
+  { key: "vermouth", label: "Vermouth", category: "wine" },
+  { key: "aromatised_wine", label: "Aromatised wine", category: "wine" },
+  { key: "other_wine", label: "Other wine", category: "wine" },
+] as const satisfies readonly AlcoholTypeOption[];
+
+type BuiltInAlcoholType = (typeof BUILT_IN_ALCOHOL_TYPES)[number]["key"];
+
+// Swatch for a new ingredient until someone picks one.
+export const DEFAULT_SWATCH: Record<BarCategory, string> = {
+  spirits: "#B8843E",
+  liqueurs: "#C9453B",
+  wine: "#E6D8A0",
+  mixers: "#DCE4E8",
+  juices: "#F2A03D",
+  fresh: "#8FB86A",
+};
+
+// Colours offered when someone adds an ingredient.
+export const SWATCH_CHOICES = [
+  "#EDE8DC",
+  "#E6D38A",
+  "#E6A24A",
+  "#E5793A",
+  "#C9453B",
+  "#7A2140",
+  "#4B1530",
+  "#8FB86A",
+  "#2F7FC1",
+  "#B8843E",
+  "#6B3A1E",
+  "#3A2418",
+];
+
+export type BuiltInEntry = Ingredient & { match: RegExp };
+
+type AlcoholicCategory = Extract<BarCategory, "spirits" | "liqueurs" | "wine">;
+type OtherCategory = Exclude<BarCategory, AlcoholicCategory>;
+
+// Bottles with alcohol: always say what kind of alcohol it is.
+const a = (
+  name: string,
+  label: string,
+  category: AlcoholicCategory,
+  alcoholType: BuiltInAlcoholType,
+  swatch: string,
+  match: RegExp,
+): BuiltInEntry => ({
+  key: name.toLowerCase(),
+  name,
+  label,
+  category,
+  alcoholType,
+  swatch,
+  match,
+});
+
+// Everything else: mixers, juices, fresh produce.
 const e = (
   name: string,
   label: string,
-  category: BarCategory,
+  category: OtherCategory,
   swatch: string,
   match: RegExp,
-): Entry => ({ name, label, category, swatch, match });
+): BuiltInEntry => ({
+  key: name.toLowerCase(),
+  name,
+  label,
+  category,
+  swatch,
+  match,
+});
 
 // Order matters: specific names come before generic ones, so
-// "sloe gin" wins over "gin" and "irish cream" wins over "irish whiskey".
+// "sloe gin" wins over "gin", "irish cream" wins over "irish whiskey",
+// "orange juice" wins over "orange", and "Fine Champagne Cognac" hits cognac
+// before champagne. My Bar groups by `category`, so file order is only
+// about matching.
 // `name` is the ingredient name TheCocktailDB uses.
-export const INGREDIENTS: Entry[] = [
+export const BUILT_IN_INGREDIENTS: BuiltInEntry[] = [
   // Liqueurs
-  e(
+  a(
     "Baileys irish cream",
     "Irish cream",
     "liqueurs",
+    "cream_liqueur",
     "#C9A77C",
     /baileys|irish cream/i,
   ),
-  e(
+  a(
     "Kahlua",
     "Coffee liqueur",
     "liqueurs",
+    "coffee_liqueur",
     "#4A2F22",
     /kahl[uú]a|coffee liqu|tia maria|espresso liqu/i,
   ),
-  e("Amaretto", "Amaretto", "liqueurs", "#9B5A2A", /amaretto|disaronno/i),
-  e("Aperol", "Aperol", "liqueurs", "#E5793A", /aperol/i),
-  e("Campari", "Campari", "liqueurs", "#C9453B", /campari/i),
-  e(
+  a(
+    "Amaretto",
+    "Amaretto",
+    "liqueurs",
+    "nut_liqueur",
+    "#9B5A2A",
+    /amaretto|disaronno/i,
+  ),
+  a("Aperol", "Aperol", "liqueurs", "bitter_aperitif", "#E5793A", /aperol/i),
+  a("Campari", "Campari", "liqueurs", "bitter_aperitif", "#C9453B", /campari/i),
+  a(
+    "Grand Marnier",
+    "Grand Marnier",
+    "liqueurs",
+    "orange_liqueur",
+    "#D07A2E",
+    /grand marnier/i,
+  ),
+  a(
+    "Blue Curacao",
+    "Blue curaçao",
+    "liqueurs",
+    "orange_liqueur",
+    "#2F7FC1",
+    /blue cura[cç]ao/i,
+  ),
+  // After Grand Marnier and curaçao: "orange liqueur" is the catch-all.
+  a(
     "Cointreau",
     "Triple sec",
     "liqueurs",
+    "orange_liqueur",
     "#E6A24A",
-    /cointreau|triple sec|combier/i,
+    /cointreau|triple sec|combier|orange liqu/i,
   ),
-  e("Grand Marnier", "Grand Marnier", "liqueurs", "#D07A2E", /grand marnier/i),
-  e("Blue Curacao", "Blue curaçao", "liqueurs", "#2F7FC1", /blue cura[cç]ao/i),
-  e("Green Chartreuse", "Chartreuse", "liqueurs", "#7FA64A", /chartreuse/i),
-  e(
+  a(
+    "Green Chartreuse",
+    "Chartreuse",
+    "liqueurs",
+    "herbal_liqueur",
+    "#7FA64A",
+    /chartreuse/i,
+  ),
+  a(
     "Maraschino liqueur",
     "Maraschino",
     "liqueurs",
+    "fruit_liqueur",
     "#E9E1D2",
     /maraschino|luxardo/i,
   ),
-  e(
+  a(
     "St. Germain",
     "Elderflower liqueur",
     "liqueurs",
+    "herbal_liqueur",
     "#E6D38A",
     /st[.\s-]*germain|elderflower liqu/i,
   ),
-  e(
+  a(
     "Chambord raspberry liqueur",
     "Raspberry liqueur",
     "liqueurs",
+    "fruit_liqueur",
     "#6B1E3A",
     /chambord|raspberry liqu/i,
   ),
-  e("Creme de Cassis", "Crème de cassis", "liqueurs", "#4B1530", /cassis/i),
-  e(
+  a(
+    "Creme de Cassis",
+    "Crème de cassis",
+    "liqueurs",
+    "fruit_liqueur",
+    "#4B1530",
+    /cassis/i,
+  ),
+  a(
     "Midori melon liqueur",
     "Melon liqueur",
     "liqueurs",
+    "fruit_liqueur",
     "#7BC043",
     /midori|melon liqu/i,
   ),
-  e(
+  a(
     "Peach schnapps",
     "Peach schnapps",
     "liqueurs",
+    "fruit_liqueur",
     "#F0A868",
     /peach schnapps/i,
   ),
-  e("Galliano", "Galliano", "liqueurs", "#E6C45C", /galliano/i),
-  e(
-    "Frangelico",
-    "Hazelnut liqueur",
-    "liqueurs",
-    "#A0673A",
-    /frangelico|hazelnut liqu/i,
-  ),
-  e("Drambuie", "Drambuie", "liqueurs", "#C08A3E", /drambuie/i),
-  e("Jagermeister", "Jägermeister", "liqueurs", "#3B2A1E", /j[aä]germeister/i),
-  e("Sambuca", "Sambuca", "liqueurs", "#E9E6DF", /sambuca/i),
-  e(
-    "Amaro Nonino",
-    "Amaro",
-    "liqueurs",
-    "#8A4B2A",
-    /amaro|averna|montenegro|nonino|fernet/i,
-  ),
-  e("Limoncello", "Limoncello", "liqueurs", "#E6D84A", /limoncello/i),
-  e(
-    "Sweet Vermouth",
-    "Sweet vermouth",
-    "liqueurs",
-    "#7A2E35",
-    /(sweet|rosso|red) vermouth|vermouth rosso|carpano|antica formula/i,
-  ),
-  e(
-    "Dry Vermouth",
-    "Dry vermouth",
-    "liqueurs",
-    "#D9D2B4",
-    /(dry|extra dry|bianco) vermouth|vermouth (dry|bianco)|noilly/i,
-  ),
-  e("Lillet Blanc", "Lillet", "liqueurs", "#E8C77A", /lillet/i),
-
-  // Spirits
-  e("Sloe gin", "Sloe gin", "spirits", "#7A2140", /sloe gin/i),
-  e(
-    "Gin",
-    "Gin",
-    "spirits",
-    "#D6E4EA",
-    /\bgin\b|gordon'?s|tanqueray|bombay|hendrick|beefeater/i,
-  ),
-  e(
-    "Vodka",
-    "Vodka",
-    "spirits",
-    "#DDE3E8",
-    /vodka|absolut|smirnoff|grey goose|reyka|ketel/i,
-  ),
-  e(
-    "Spiced rum",
-    "Spiced rum",
-    "spirits",
-    "#9A5B2C",
-    /spiced rum|captain morgan|kraken/i,
-  ),
-  e("Malibu rum", "Coconut rum", "spirits", "#F2EEE6", /malibu|coconut rum/i),
-  e(
-    "Dark rum",
-    "Dark rum",
-    "spirits",
-    "#6B3A1E",
-    /(dark|black|gold|aged|a[ñn]ejo) rum|myers|gosling/i,
-  ),
-  e(
-    "Light rum",
-    "White rum",
-    "spirits",
-    "#EDE8DC",
-    /(white|light|silver|blanco|carta blanca) rum|bacardi/i,
-  ),
-  e("Rum", "Rum", "spirits", "#B07A3E", /\brum\b|\bron\b|rhum/i),
-  e("Mezcal", "Mezcal", "spirits", "#D8D0B0", /mezcal/i),
-  e(
-    "Tequila",
-    "Tequila",
-    "spirits",
-    "#DCC98E",
-    /tequila|patr[oó]n|jose cuervo|olmeca/i,
-  ),
-  e("Cachaca", "Cachaça", "spirits", "#E4DCC4", /cacha[cç]a/i),
-  e("Pisco", "Pisco", "spirits", "#E6E0CC", /pisco/i),
-  e(
-    "Bourbon",
-    "Bourbon",
-    "spirits",
-    "#B8702E",
-    /bourbon|jim beam|maker'?s mark|buffalo trace|wild turkey|woodford/i,
-  ),
-  e("Rye whiskey", "Rye whiskey", "spirits", "#A8662C", /\brye\b/i),
-  e(
-    "Irish whiskey",
-    "Irish whiskey",
-    "spirits",
-    "#C0843A",
-    /irish whiske?y|jameson|bushmills|tullamore/i,
-  ),
-  e(
-    "Scotch",
-    "Scotch",
-    "spirits",
-    "#B27A36",
-    /scotch|single malt|johnnie walker|glen|laphroaig|talisker/i,
-  ),
-  e(
-    "Blended whiskey",
-    "Whiskey",
-    "spirits",
-    "#B8843E",
-    /whiske?y|jack daniel/i,
-  ),
-  e(
-    "Cognac",
-    "Cognac",
-    "spirits",
-    "#A0562A",
-    /cognac|hennessy|r[eé]my martin|courvoisier/i,
-  ),
-  e("Brandy", "Brandy", "spirits", "#A8602E", /brandy|armagnac|calvados/i),
-  e("Absinthe", "Absinthe", "spirits", "#8FB86A", /absinthe/i),
-  e(
+  a(
     "Passoa",
     "Passion fruit liqueur",
     "liqueurs",
-    "#e64a88",
+    "fruit_liqueur",
+    "#E64A88",
     /passo[aã]|passion[\s-]*fruit liqu/i,
   ),
+  a(
+    "Galliano",
+    "Galliano",
+    "liqueurs",
+    "herbal_liqueur",
+    "#E6C45C",
+    /galliano/i,
+  ),
+  a(
+    "Frangelico",
+    "Hazelnut liqueur",
+    "liqueurs",
+    "nut_liqueur",
+    "#A0673A",
+    /frangelico|hazelnut liqu/i,
+  ),
+  a(
+    "Drambuie",
+    "Drambuie",
+    "liqueurs",
+    "herbal_liqueur",
+    "#C08A3E",
+    /drambuie/i,
+  ),
+  a(
+    "Jagermeister",
+    "Jägermeister",
+    "liqueurs",
+    "herbal_liqueur",
+    "#3B2A1E",
+    /j[aä]germeister/i,
+  ),
+  a("Sambuca", "Sambuca", "liqueurs", "anise_liqueur", "#E9E6DF", /sambuca/i),
+  a(
+    "Amaro Nonino",
+    "Amaro",
+    "liqueurs",
+    "amaro",
+    "#8A4B2A",
+    /amaro|averna|montenegro|nonino|fernet/i,
+  ),
+  a(
+    "Limoncello",
+    "Limoncello",
+    "liqueurs",
+    "fruit_liqueur",
+    "#E6D84A",
+    /limoncello/i,
+  ),
+  a(
+    "Sloe gin",
+    "Sloe gin",
+    "liqueurs",
+    "fruit_liqueur",
+    "#7A2140",
+    /sloe gin/i,
+  ),
 
-  // Mixers
+  // Wine: fortified and aromatised (sparkling comes after the spirits)
+  a(
+    "Sweet Vermouth",
+    "Sweet vermouth",
+    "wine",
+    "vermouth",
+    "#7A2E35",
+    /(sweet|rosso|red) vermouth|vermouth rosso|carpano|antica formula/i,
+  ),
+  a(
+    "Dry Vermouth",
+    "Dry vermouth",
+    "wine",
+    "vermouth",
+    "#D9D2B4",
+    /(dry|extra dry|bianco) vermouth|vermouth (dry|bianco)|noilly/i,
+  ),
+  a("Lillet Blanc", "Lillet", "wine", "aromatised_wine", "#E8C77A", /lillet/i),
+
+  // Spirits
+  a(
+    "Gin",
+    "Gin",
+    "spirits",
+    "gin",
+    "#D6E4EA",
+    /\bgin\b|gordon'?s|tanqueray|bombay|hendrick|beefeater/i,
+  ),
+  a(
+    "Vodka",
+    "Vodka",
+    "spirits",
+    "vodka",
+    "#DDE3E8",
+    /vodka|absolut|smirnoff|grey goose|reyka|ketel/i,
+  ),
+  a(
+    "Spiced rum",
+    "Spiced rum",
+    "spirits",
+    "rum",
+    "#9A5B2C",
+    /spiced rum|captain morgan|kraken/i,
+  ),
+  a(
+    "Malibu rum",
+    "Coconut rum",
+    "spirits",
+    "rum",
+    "#F2EEE6",
+    /malibu|coconut rum/i,
+  ),
+  a(
+    "Dark rum",
+    "Dark rum",
+    "spirits",
+    "rum",
+    "#6B3A1E",
+    /(dark|black|gold|aged|a[ñn]ejo) rum|myers|gosling/i,
+  ),
+  a(
+    "Light rum",
+    "White rum",
+    "spirits",
+    "rum",
+    "#EDE8DC",
+    /(white|light|silver|blanco|carta blanca) rum|bacardi/i,
+  ),
+  a("Rum", "Rum", "spirits", "rum", "#B07A3E", /\brum\b|\bron\b|rhum/i),
+  a("Mezcal", "Mezcal", "spirits", "mezcal", "#D8D0B0", /mezcal/i),
+  a(
+    "Tequila",
+    "Tequila",
+    "spirits",
+    "tequila",
+    "#DCC98E",
+    /tequila|patr[oó]n|jose cuervo|olmeca/i,
+  ),
+  a("Cachaca", "Cachaça", "spirits", "cachaca", "#E4DCC4", /cacha[cç]a/i),
+  a("Pisco", "Pisco", "spirits", "pisco", "#E6E0CC", /pisco/i),
+  a(
+    "Bourbon",
+    "Bourbon",
+    "spirits",
+    "whiskey",
+    "#B8702E",
+    /bourbon|jim beam|maker'?s mark|buffalo trace|wild turkey|woodford/i,
+  ),
+  a("Rye whiskey", "Rye whiskey", "spirits", "whiskey", "#A8662C", /\brye\b/i),
+  a(
+    "Irish whiskey",
+    "Irish whiskey",
+    "spirits",
+    "whiskey",
+    "#C0843A",
+    /irish whiske?y|jameson|bushmills|tullamore/i,
+  ),
+  a(
+    "Scotch",
+    "Scotch",
+    "spirits",
+    "whiskey",
+    "#B27A36",
+    /scotch|single malt|johnnie walker|glen|laphroaig|talisker/i,
+  ),
+  a(
+    "Blended whiskey",
+    "Whiskey",
+    "spirits",
+    "whiskey",
+    "#B8843E",
+    /whiske?y|jack daniel/i,
+  ),
+  a(
+    "Cognac",
+    "Cognac",
+    "spirits",
+    "brandy",
+    "#A0562A",
+    /cognac|hennessy|r[eé]my martin|courvoisier/i,
+  ),
+  a(
+    "Brandy",
+    "Brandy",
+    "spirits",
+    "brandy",
+    "#A8602E",
+    /brandy|armagnac|calvados/i,
+  ),
+  a("Absinthe", "Absinthe", "spirits", "absinthe", "#8FB86A", /absinthe/i),
+
+  // Wine: sparkling
+  a("Prosecco", "Prosecco", "wine", "sparkling_wine", "#E8DC9A", /prosecco/i),
+  a(
+    "Champagne",
+    "Champagne",
+    "wine",
+    "sparkling_wine",
+    "#E6D8A0",
+    /champagne|cava|cr[eé]mant|sparkling wine|spumante/i,
+  ),
+
+  // Mixers: bitters, sodas, syrups
   e(
     "Angostura bitters",
     "Angostura bitters",
@@ -228,14 +455,6 @@ export const INGREDIENTS: Entry[] = [
     /soda water|club soda|sparkling water|seltzer/i,
   ),
   e("Cola", "Cola", "mixers", "#3A2418", /\bcola\b|coca-cola|pepsi/i),
-  e("Prosecco", "Prosecco", "mixers", "#E8DC9A", /prosecco/i),
-  e(
-    "Champagne",
-    "Champagne",
-    "mixers",
-    "#E6D8A0",
-    /champagne|cava|cr[eé]mant/i,
-  ),
   e("Grenadine", "Grenadine", "mixers", "#B0263A", /grenadine/i),
   e("Orgeat syrup", "Orgeat", "mixers", "#E9D8B8", /orgeat/i),
   e(
@@ -246,29 +465,31 @@ export const INGREDIENTS: Entry[] = [
     /simple syrup|sugar syrup|gomme/i,
   ),
 
-  // Fresh
-  e("Lime", "Lime", "fresh", "#8FB86A", /\blime\b/i),
-  e("Lemon", "Lemon", "fresh", "#E6C45C", /\blemon\b/i),
+  // Juices: before Fresh, so "orange juice" doesn't match "orange"
+  e("Orange juice", "Orange juice", "juices", "#F2A03D", /orange juice/i),
+  e(
+    "Pineapple juice",
+    "Pineapple juice",
+    "juices",
+    "#F2D35C",
+    /pineapple juice/i,
+  ),
+  e("Cranberry juice", "Cranberry juice", "juices", "#A3233A", /cranberry/i),
+  e(
+    "Grapefruit juice",
+    "Grapefruit juice",
+    "juices",
+    "#E8826A",
+    /grapefruit juice/i,
+  ),
+  e("Apple juice", "Apple juice", "juices", "#E3C46B", /\bapple juice/i),
+  e("Lime juice", "Lime juice", "juices", "#C9D97A", /lime juice/i),
+  e("Lemon juice", "Lemon juice", "juices", "#F0E08A", /lemon juice/i),
+
+  // Fresh: whole fruit and herbs
+  e("Orange", "Orange", "fresh", "#F28C28", /\boranges?\b/i),
+  e("Lime", "Lime", "fresh", "#8FB86A", /\blimes?\b/i),
+  e("Lemon", "Lemon", "fresh", "#E6C45C", /\blemons?\b/i),
   e("Mint", "Mint", "fresh", "#5FA05A", /\bmint\b/i),
   e("Basil", "Basil", "fresh", "#6FA04A", /\bbasil\b/i),
 ];
-
-const strip = ({ match: _match, ...ingredient }: Entry): Ingredient =>
-  ingredient;
-
-// Text from a barcode lookup or a label -> the ingredient recipes use.
-export function normalizeIngredient(text: string): Ingredient | null {
-  const hit = INGREDIENTS.find((i) => i.match.test(text));
-  return hit ? strip(hit) : null;
-}
-
-// For manual search and the "Change" picker.
-export function searchIngredients(query: string): Ingredient[] {
-  const q = query.trim().toLowerCase();
-  const all = INGREDIENTS.map(strip);
-  if (!q) return all;
-  return all.filter(
-    (i) =>
-      i.label.toLowerCase().includes(q) || i.name.toLowerCase().includes(q),
-  );
-}
