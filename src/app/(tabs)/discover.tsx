@@ -1,4 +1,5 @@
 import { CocktailCard } from "@/components/card/CocktailCard";
+import { TextField } from "@/components/forms/TextField";
 import { Header } from "@/components/layout/Header";
 import { AppText } from "@/components/primitivies/AppText";
 import { useRandomCocktails } from "@/hooks/useCocktails";
@@ -37,11 +38,13 @@ export default function Discover() {
       >
         <Header title="Discover" subtitle="Find new cocktails to try." />
 
-        <View style={styles.list}>
-          <AppText variant="title" style={{ marginBottom: spacing.sp8 }}>
-            All Cocktails
-          </AppText>
+        <View style={styles.divider} />
 
+        <View>
+          <TextField label="Search" placeholder="Search cocktails..." />
+        </View>
+
+        <View style={styles.list}>
           {random.loading ? (
             <ActivityIndicator color={colors.amber} />
           ) : random.error ? (
@@ -59,6 +62,11 @@ export default function Discover() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.ground },
+
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.line,
+  },
   content: {
     paddingHorizontal: spacing.sp24,
     paddingTop: spacing.sp16,

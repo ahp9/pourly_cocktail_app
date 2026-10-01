@@ -1,4 +1,3 @@
-import { Path } from "react-native-svg";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_LIQUID,
@@ -12,8 +11,9 @@ import {
   glassStroke,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import type { GlassProps } from "@/types/glasses";
+import { Path } from "react-native-svg";
 
 /** Wide shallow upper bowl stepping into a small round lower bowl. */
 const BOWL =

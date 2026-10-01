@@ -1,4 +1,3 @@
-import { Path } from "react-native-svg";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_LIQUID,
@@ -12,12 +11,14 @@ import {
   innerWall,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import type { GlassProps } from "@/types/glasses";
+import { Path } from "react-native-svg";
 
 const OUTER = "M58 46 H162 L150 214 Q149 224 139 224 H81 Q71 224 70 214 Z";
 const CAVITY = "M61 47 H159 L148 204 Q147 210 141 210 H79 Q73 210 72 204 Z";
-const INNER_WALL = "M61.2 50 L72 204 Q73 210 79 210 H141 Q147 210 148 204 L158.8 50";
+const INNER_WALL =
+  "M61.2 50 L72 204 Q73 210 79 210 H141 Q147 210 148 204 L158.8 50";
 
 /** Shaker-style pint glass, wider at the top. */
 export function PintGlass({

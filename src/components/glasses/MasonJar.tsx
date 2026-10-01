@@ -1,4 +1,3 @@
-import { Path, Rect } from "react-native-svg";
 import {
   CREAM,
   DEFAULT_HEIGHT,
@@ -14,8 +13,9 @@ import {
   innerWall,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import type { GlassProps } from "@/types/glasses";
+import { Path, Rect } from "react-native-svg";
 
 const OUTER =
   "M66 56 H154 V78 C154 84 162 86 162 96 V208 Q162 224 146 224 H74 Q58 224 58 208 V96 C58 86 66 84 66 78 Z";

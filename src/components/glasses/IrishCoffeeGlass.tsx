@@ -1,4 +1,3 @@
-import { Path } from "react-native-svg";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_LIQUID,
@@ -13,10 +12,12 @@ import {
   solidGlass,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import type { GlassProps } from "@/types/glasses";
+import { Path } from "react-native-svg";
 
-const BOWL = "M60 56 H140 L136 160 C135 176 120 182 100 182 C80 182 65 176 64 160 Z";
+const BOWL =
+  "M60 56 H140 L136 160 C135 176 120 182 100 182 C80 182 65 176 64 160 Z";
 const HANDLE =
   "M136 86 H146 Q162 86 162 102 V124 Q162 140 146 140 H135 Z " +
   "M136 96 H144 Q152 96 152 104 V122 Q152 130 144 130 H136 Z";
@@ -37,7 +38,13 @@ export function IrishCoffeeGlass({
       <Path d={HANDLE} fillRule="evenodd" {...solidGlass} />
       <Path d={HANDLE} fillRule="evenodd" {...glassStroke} />
 
-      <StemAndFoot cx={100} top={180} stemHalf={6} footTop={206} footHalf={36} />
+      <StemAndFoot
+        cx={100}
+        top={180}
+        stemHalf={6}
+        footTop={206}
+        footHalf={36}
+      />
 
       <Path d={BOWL} fill={url(ids.glass)} />
       <Liquid ids={ids} top={76} />

@@ -1,5 +1,3 @@
-import { Ellipse, LinearGradient, Path, Stop } from "react-native-svg";
-import { colors } from "@/styles";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_LIQUID,
@@ -10,8 +8,10 @@ import {
   Shadow,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import { colors } from "@/styles";
+import type { GlassProps } from "@/types/glasses";
+import { Ellipse, LinearGradient, Path, Stop } from "react-native-svg";
 
 const BODY = "M44 96 H140 V206 Q140 224 122 224 H62 Q44 224 44 206 Z";
 const HANDLE =

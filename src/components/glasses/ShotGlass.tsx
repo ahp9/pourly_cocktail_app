@@ -1,4 +1,3 @@
-import { Path } from "react-native-svg";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_LIQUID,
@@ -12,12 +11,14 @@ import {
   innerWall,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import type { GlassProps } from "@/types/glasses";
+import { Path } from "react-native-svg";
 
 const OUTER = "M78 146 H142 L136 216 Q135 224 127 224 H93 Q85 224 84 216 Z";
 const CAVITY = "M81 147 H139 L134 202 Q133 206 129 206 H91 Q87 206 86 202 Z";
-const INNER_WALL = "M81.3 150 L86 202 Q87 206 91 206 H129 Q133 206 134 202 L138.7 150";
+const INNER_WALL =
+  "M81.3 150 L86 202 Q87 206 91 206 H129 Q133 206 134 202 L138.7 150";
 
 /** Shot glass: small, slightly flared, thick base. */
 export function ShotGlass({

@@ -1,4 +1,3 @@
-import { Path } from "react-native-svg";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_LIQUID,
@@ -13,12 +12,14 @@ import {
   innerWall,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import type { GlassProps } from "@/types/glasses";
+import { Path } from "react-native-svg";
 
 const OUTER = "M70 40 H150 L148 214 Q147 224 137 224 H83 Q73 224 72 214 Z";
 const CAVITY = "M73 41 H147 L145 204 Q145 210 139 210 H81 Q75 210 75 204 Z";
-const INNER_WALL = "M73 44 L75 204 Q75 210 81 210 H139 Q145 210 145 204 L147 44";
+const INNER_WALL =
+  "M73 44 L75 204 Q75 210 81 210 H139 Q145 210 145 204 L147 44";
 
 /** Highball / Collins: tall, narrow, straight-sided. */
 export function HighballGlass({

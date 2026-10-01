@@ -1,4 +1,3 @@
-import { Ellipse, LinearGradient, Line, Path, Rect, Stop } from "react-native-svg";
 import {
   CREAM,
   DEFAULT_HEIGHT,
@@ -11,8 +10,16 @@ import {
   glassStroke,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import type { GlassProps } from "@/types/glasses";
+import {
+  Ellipse,
+  Line,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+} from "react-native-svg";
 
 const COPPER_DARK = "#7E4224";
 const COPPER_MID = "#B8693A";
@@ -62,8 +69,24 @@ export function CopperMug({
 
       {/* Body */}
       <Path d={BODY} fill={url(copperId)} />
-      <Line x1="47" y1="120" x2="143" y2="120" stroke={COPPER_DARK} strokeOpacity={0.6} strokeWidth={1.5} />
-      <Line x1="48" y1="204" x2="140" y2="204" stroke={COPPER_DARK} strokeOpacity={0.6} strokeWidth={1.5} />
+      <Line
+        x1="47"
+        y1="120"
+        x2="143"
+        y2="120"
+        stroke={COPPER_DARK}
+        strokeOpacity={0.6}
+        strokeWidth={1.5}
+      />
+      <Line
+        x1="48"
+        y1="204"
+        x2="140"
+        y2="204"
+        stroke={COPPER_DARK}
+        strokeOpacity={0.6}
+        strokeWidth={1.5}
+      />
       <Path d={BODY} {...glassStroke} />
 
       {/* Rim and opening */}

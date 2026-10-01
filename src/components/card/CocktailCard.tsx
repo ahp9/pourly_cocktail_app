@@ -11,29 +11,18 @@ export function CocktailCard({ cocktail }: { cocktail: Cocktail }) {
 
   return (
     <View style={styles.card}>
-      <View
-        style={{ width: 70, marginRight: spacing.sp20, alignItems: "center" }}
-      >
-        <CocktailGlass glass={cocktail.glass} color={color} />
+      <View style={styles.imageContainer}>
+        <CocktailGlass
+          glass={cocktail.glass}
+          color={color}
+          height={90}
+          width={90}
+        />
       </View>
-      <View>
-        <AppText variant="label" style={{ marginBottom: 8 }}>
+      <View style={styles.textContainer}>
+        <AppText variant="heading" style={{ marginBottom: 8 }}>
           {cocktail.name}
         </AppText>
-
-        <View style={styles.swatches}>
-          {cocktail.ingredients.map((i) => (
-            <View
-              key={`${i.position}-${i.name}`}
-              style={[
-                styles.swatch,
-                // Recipe-only ingredients (egg white, nutmeg) have no swatch
-                { backgroundColor: color },
-              ]}
-            />
-          ))}
-        </View>
-
         <AppText variant="body" color="muted">
           {names}
         </AppText>
@@ -51,6 +40,13 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
   },
-  swatches: { flexDirection: "row", gap: 4, marginBottom: 8 },
-  swatch: { width: 8, height: 20, borderRadius: 3 },
+  imageContainer: {
+    marginRight: spacing.sp20,
+    alignItems: "center",
+  },
+  textContainer: {
+    flex: 1,
+    textOverflow: "clip",
+    overflow: "hidden",
+  },
 });

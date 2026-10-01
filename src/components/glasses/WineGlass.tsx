@@ -1,4 +1,3 @@
-import { Path } from "react-native-svg";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_LIQUID,
@@ -12,8 +11,9 @@ import {
   glassStroke,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import type { GlassProps } from "@/types/glasses";
+import { Path } from "react-native-svg";
 
 const BOWL =
   "M76 40 H144 C152 64 158 88 154 104 C150 120 134 130 110 130 C86 130 70 120 66 104 C62 88 68 64 76 40 Z";

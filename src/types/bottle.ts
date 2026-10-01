@@ -1,4 +1,7 @@
 // Shelves in My Bar. Fixed in code: each one is a section on screen.
+
+import { Flavor } from "./cocktail";
+
 // Spirits, liqueurs and wine contain alcohol; the rest don't.
 export type BarCategory =
   | "spirits"
@@ -47,6 +50,7 @@ export type Ingredient = {
   category: BarCategory;
   alcoholType?: AlcoholType; // only for spirits, liqueurs and wine
   swatch: string; // colour of the little bottle swatch in My Bar
+  flavor?: Flavor; // 0..1 per taste, from the `ingredients` table
   custom?: boolean; // added by a user, not part of the built-in list
 };
 

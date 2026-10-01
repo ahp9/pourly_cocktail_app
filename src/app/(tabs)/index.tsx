@@ -84,7 +84,7 @@ export default function Index() {
             <MartiniGlass
               height={200}
               width={200}
-              color={colors.drink.orgeat}
+              color={colors.drink.aperol}
             />
           </View>
           <Text style={styles.title}>What are we drinking?</Text>

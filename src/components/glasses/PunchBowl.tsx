@@ -1,5 +1,3 @@
-import { Line, Path } from "react-native-svg";
-import { colors } from "@/styles";
 import {
   CREAM,
   DEFAULT_HEIGHT,
@@ -15,8 +13,10 @@ import {
   glassStroke,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import { colors } from "@/styles";
+import type { GlassProps } from "@/types/glasses";
+import { Line, Path } from "react-native-svg";
 
 const BOWL = "M24 88 H196 C196 140 160 176 110 176 C60 176 24 140 24 88 Z";
 const FACETS = "M60 96 Q64 140 90 168 M110 96 V174 M160 96 Q156 140 130 168";
@@ -52,7 +52,13 @@ export function PunchBowl({
         <IceCube x={64} y={106} size={26} rotate={-8} />
         <IceCube x={100} y={102} size={24} rotate={12} />
       </Liquid>
-      <Path d={FACETS} fill="none" stroke={CREAM} strokeOpacity={0.12} strokeWidth={1} />
+      <Path
+        d={FACETS}
+        fill="none"
+        stroke={CREAM}
+        strokeOpacity={0.12}
+        strokeWidth={1}
+      />
       <Path d={BOWL} {...glassStroke} />
       <Highlight d="M36 100 C40 130 54 152 72 164" />
     </GlassFrame>

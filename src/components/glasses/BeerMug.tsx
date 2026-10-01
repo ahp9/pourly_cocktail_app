@@ -1,4 +1,3 @@
-import { Line, Path } from "react-native-svg";
 import {
   CREAM,
   DEFAULT_HEIGHT,
@@ -14,8 +13,9 @@ import {
   solidGlass,
   url,
   useGlassIds,
-} from "./parts";
-import type { GlassProps } from "./types";
+} from "@/components/glasses/parts";
+import type { GlassProps } from "@/types/glasses";
+import { Line, Path } from "react-native-svg";
 
 const OUTER = "M42 76 H142 V208 Q142 224 126 224 H58 Q42 224 42 208 Z";
 const CAVITY = "M48 77 H136 V196 Q136 206 126 206 H58 Q48 206 48 196 Z";
@@ -47,8 +47,24 @@ export function BeerMug({
         <Path d={FOAM} fill={CREAM} fillOpacity={0.55} />
       </Liquid>
       <Path d={INNER_WALL} {...innerWall} />
-      <Line x1="72" y1="114" x2="72" y2="192" stroke={CREAM} strokeOpacity={0.12} strokeWidth={1} />
-      <Line x1="112" y1="114" x2="112" y2="192" stroke={CREAM} strokeOpacity={0.12} strokeWidth={1} />
+      <Line
+        x1="72"
+        y1="114"
+        x2="72"
+        y2="192"
+        stroke={CREAM}
+        strokeOpacity={0.12}
+        strokeWidth={1}
+      />
+      <Line
+        x1="112"
+        y1="114"
+        x2="112"
+        y2="192"
+        stroke={CREAM}
+        strokeOpacity={0.12}
+        strokeWidth={1}
+      />
       <Path d={OUTER} {...glassStroke} />
 
       <Highlight d="M54 90 V196" />
