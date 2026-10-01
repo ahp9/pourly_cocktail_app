@@ -1,27 +1,28 @@
+import { GlassType, normalizeGlass } from "@/components/glasses/glassMapping";
+import { GlassProps } from "@/types/glasses";
 import type { ComponentType } from "react";
-import { BalloonGlass } from "./BalloonGlass";
-import { BeerMug } from "./BeerMug";
-import { ChampagneFlute } from "./ChampagneFlute";
-import { CoffeeMug } from "./CoffeeMug";
-import { CopperMug } from "./CopperMug";
-import { CordialGlass } from "./CordialGlass";
-import { CoupeGlass } from "./CoupeGlass";
-import { HighballGlass } from "./HighballGlass";
-import { HurricaneGlass } from "./HurricaneGlass";
-import { IrishCoffeeGlass } from "./IrishCoffeeGlass";
-import { MargaritaGlass } from "./MargaritaGlass";
-import { MartiniGlass } from "./MartiniGlass";
-import { MasonJar } from "./MasonJar";
-import { PilsnerGlass } from "./PilsnerGlass";
-import { PintGlass } from "./PintGlass";
-import { Pitcher } from "./Pitcher";
-import { PunchBowl } from "./PunchBowl";
-import { ShotGlass } from "./ShotGlass";
-import { WhiskeyGlass } from "./WhiskeyGlass";
-import { WhiskeySourGlass } from "./WhiskeySourGlass";
-import { WineGlass } from "./WineGlass";
-import { normalizeGlass, type GlassType } from "./glassMapping";
-import type { GlassProps } from "./types";
+
+import { BalloonGlass } from "@/components/glasses/BalloonGlass";
+import { BeerMug } from "@/components/glasses/BeerMug";
+import { ChampagneFlute } from "@/components/glasses/ChampagneFlute";
+import { CoffeeMug } from "@/components/glasses/CoffeeMug";
+import { CopperMug } from "@/components/glasses/CopperMug";
+import { CordialGlass } from "@/components/glasses/CordialGlass";
+import { CoupeGlass } from "@/components/glasses/CoupeGlass";
+import { HighballGlass } from "@/components/glasses/HighballGlass";
+import { HurricaneGlass } from "@/components/glasses/HurricaneGlass";
+import { IrishCoffeeGlass } from "@/components/glasses/IrishCoffeeGlass";
+import { MargaritaGlass } from "@/components/glasses/MargaritaGlass";
+import { MartiniGlass } from "@/components/glasses/MartiniGlass";
+import { MasonJar } from "@/components/glasses/MasonJar";
+import { PilsnerGlass } from "@/components/glasses/PilsnerGlass";
+import { PintGlass } from "@/components/glasses/PintGlass";
+import { Pitcher } from "@/components/glasses/Pitcher";
+import { PunchBowl } from "@/components/glasses/PunchBowl";
+import { ShotGlass } from "@/components/glasses/ShotGlass";
+import { WhiskeyGlass } from "@/components/glasses/WhiskeyGlass";
+import { WhiskeySourGlass } from "@/components/glasses/WhiskeySourGlass";
+import { WineGlass } from "@/components/glasses/WineGlass";
 
 export const GLASS_COMPONENTS: Record<GlassType, ComponentType<GlassProps>> = {
   whiskey: WhiskeyGlass,
@@ -54,10 +55,17 @@ export type GlassComponentProps = GlassProps & {
 };
 
 /** Renders the right glass for a type or raw name. Returns null for unknown names. */
-export function Glass({ type, ...props }: GlassComponentProps) {
-  const key = normalizeGlass(type);
-  if (!key) return null;
+export function CocktailGlass({
+  glass,
+  ...props
+}: GlassProps & { glass: string | null }) {
+  const type = glass ? normalizeGlass(glass) : undefined;
 
-  const Component = GLASS_COMPONENTS[key];
-  return <Component {...props} />;
+  if (glass && !type && __DEV__) {
+    console.warn(`No glass for "${glass}". Add it to GLASS_NAME_MAP.`);
+  }
+
+  // Most CocktailDB drinks use a cocktail glass, so that's the fallback
+  const Glass = GLASS_COMPONENTS[type ?? "martini"];
+  return <Glass {...props} />;
 }

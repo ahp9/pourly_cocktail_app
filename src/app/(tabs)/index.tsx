@@ -10,8 +10,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Glitter } from "@/components/animation/Glitter";
 import { Button } from "@/components/controls/Button";
+import { MartiniGlass } from "@/components/glasses/MartiniGlass";
 import { Icon } from "@/components/icon";
-import { MintGlass } from "@/components/images/MintGlass";
 import { Header } from "@/components/layout/Header";
 import { NavRow } from "@/components/primitivies/NavRow";
 import { useAuth } from "@/hooks/useAuth";
@@ -81,7 +81,11 @@ export default function Index() {
             }}
           >
             <Glitter height={200} />
-            <MintGlass width={200} height={200} />
+            <MartiniGlass
+              height={200}
+              width={200}
+              color={colors.drink.orgeat}
+            />
           </View>
           <Text style={styles.title}>What are we drinking?</Text>
         </View>

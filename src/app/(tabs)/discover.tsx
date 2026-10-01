@@ -1,11 +1,27 @@
+import { CocktailCard } from "@/components/card/CocktailCard";
 import { Header } from "@/components/layout/Header";
+import { AppText } from "@/components/primitivies/AppText";
+import { useRandomCocktails } from "@/hooks/useCocktails";
 import { useProfile } from "@/hooks/useProfile";
 import { colors, spacing } from "@/styles";
-import { RefreshControl, ScrollView, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Discover() {
-  const { profile, loading, refreshing, error, refetch } = useProfile();
+  const profile = useProfile();
+  const random = useRandomCocktails(10);
+
+  const refreshing = profile.refreshing || random.refreshing;
+  const onRefresh = () => {
+    profile.refetch();
+    random.refetch();
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -14,12 +30,28 @@ export default function Discover() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={refetch}
+            onRefresh={onRefresh}
             tintColor={colors.amber}
           />
         }
       >
         <Header title="Discover" subtitle="Find new cocktails to try." />
+
+        <View style={styles.list}>
+          <AppText variant="title" style={{ marginBottom: spacing.sp8 }}>
+            All Cocktails
+          </AppText>
+
+          {random.loading ? (
+            <ActivityIndicator color={colors.amber} />
+          ) : random.error ? (
+            <AppText>{random.error}</AppText>
+          ) : (
+            random.cocktails.map((c) => (
+              <CocktailCard key={c.id} cocktail={c} />
+            ))
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -33,4 +65,5 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sp120,
     gap: spacing.sp16,
   },
+  list: { gap: spacing.sp8 },
 });

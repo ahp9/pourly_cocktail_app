@@ -1,4 +1,11 @@
-import { Cocktail, Ingredient, PreparationMethod } from "@/types/cocktail";
+import { supabase } from "@/services/supabase";
+import type {
+  Availability,
+  Cocktail,
+  CocktailIngredient,
+  Flavor,
+  PreparationMethod,
+} from "@/types/cocktail";
 
 const API_URL = "https://www.thecocktaildb.com/api/json/v1/1";
 
@@ -115,7 +122,7 @@ function getMethod(instructions: string | null): PreparationMethod {
 // ------------------------------------
 
 export function normalizeCocktailData(cocktail: any): Cocktail {
-  const ingredients: Ingredient[] = [];
+  const ingredients: CocktailIngredient[] = [];
 
   for (let i = 1; i <= 15; i++) {
     const ingredient = cocktail[`strIngredient${i}`];
@@ -124,9 +131,18 @@ export function normalizeCocktailData(cocktail: any): Cocktail {
 
     if (ingredient) {
       ingredients.push({
-        ingredient: ingredient.trim(),
-        measure: measure?.trim() ?? null,
+        key: ingredient.trim().toLowerCase(),
+        name: ingredient.trim(),
+        measure: measure?.trim() || null,
         measureMl: convertToMl(measure),
+        position: i,
+        // Not looked up: these drinks come straight from TheCocktailDB.
+        kind: null,
+        availability: null,
+        barKeys: [],
+        abv: null,
+        swatch: null,
+        flavor: null,
       });
     }
   }
@@ -150,4 +166,129 @@ export function normalizeCocktailData(cocktail: any): Cocktail {
 
     instructions: cocktail.strInstructions ?? null,
   };
+}
+
+// ------------------------------------
+// Cocktails from Supabase, with their ingredients
+//
+// 1. Get the cocktail(s) from `cocktails`.
+// 2. Get their recipe lines from `cocktail_ingredients`.
+// 3. Look up those lines' ingredient_key in `ingredients`. Lines whose
+//    ingredient isn't in the table still show, just without the details.
+// ------------------------------------
+
+type CocktailRow = Omit<Cocktail, "ingredients" | "method"> & {
+  method: PreparationMethod | null;
+};
+
+type LineRow = {
+  cocktail_id: string;
+  ingredient: string;
+  ingredient_key: string | null;
+  measure: string | null;
+  measure_ml: number | null;
+  position: number;
+};
+
+type IngredientRow = Flavor & {
+  key: string;
+  kind: string;
+  availability: Availability;
+  bar_keys: string[];
+  abv: number;
+  swatch: string | null;
+};
+
+const COCKTAIL_COLUMNS =
+  "id, name, image, glass, category, alcoholic, method, instructions";
+
+// One cocktail with its ingredients.
+export async function getCocktail(id: string): Promise<Cocktail> {
+  const { data, error } = await supabase
+    .from("cocktails")
+    .select(COCKTAIL_COLUMNS)
+    .eq("id", id)
+    .single();
+  if (error) throw error;
+
+  const [cocktail] = await addIngredients([data as CocktailRow]);
+  return cocktail;
+}
+
+// `count` random cocktails with their ingredients.
+export async function getRandomCocktails(count: number): Promise<Cocktail[]> {
+  const { data, error } = await supabase.rpc("random_cocktails", { n: count });
+  if (error) throw error;
+
+  return addIngredients((data ?? []) as CocktailRow[]);
+}
+
+// Steps 2 and 3 for cocktails you already have.
+export async function addIngredients(
+  cocktails: CocktailRow[],
+): Promise<Cocktail[]> {
+  if (cocktails.length === 0) return [];
+
+  // 2. Recipe lines for these cocktails
+  const { data: lineData, error: linesError } = await supabase
+    .from("cocktail_ingredients")
+    .select(
+      "cocktail_id, ingredient, ingredient_key, measure, measure_ml, position",
+    )
+    .in(
+      "cocktail_id",
+      cocktails.map((c) => c.id),
+    )
+    .order("position");
+  if (linesError) throw linesError;
+  const lines = (lineData ?? []) as LineRow[];
+
+  // 3. The ingredients those lines use, if they're in the table
+  const keys = [
+    ...new Set(lines.map((l) => l.ingredient_key).filter((k) => k !== null)),
+  ];
+  const { data: ingredientData, error: ingredientsError } = await supabase
+    .from("ingredients")
+    .select(
+      "key, kind, availability, bar_keys, abv, swatch, sweet, sour, bitter, fruity, herbal, creamy, fizzy",
+    )
+    .in("key", keys);
+  if (ingredientsError) throw ingredientsError;
+  const byKey = new Map(
+    ((ingredientData ?? []) as IngredientRow[]).map((i) => [i.key, i]),
+  );
+
+  // Put each line on its cocktail
+  return cocktails.map(({ method, ...cocktail }) => ({
+    ...cocktail,
+    method: method ?? undefined,
+    ingredients: lines
+      .filter((l) => l.cocktail_id === cocktail.id)
+      .map((l): CocktailIngredient => {
+        const found = l.ingredient_key ? byKey.get(l.ingredient_key) : null;
+        return {
+          key: l.ingredient_key,
+          name: l.ingredient,
+          measure: l.measure,
+          measureMl: l.measure_ml,
+          position: l.position,
+          kind: found?.kind ?? null,
+          availability: found?.availability ?? null,
+          barKeys: found?.bar_keys ?? [],
+          abv: found?.abv ?? null,
+          swatch: found?.swatch ?? null,
+          flavor: found
+            ? {
+                sweet: found.sweet,
+                sour: found.sour,
+                bitter: found.bitter,
+                fruity: found.fruity,
+                herbal: found.herbal,
+                creamy: found.creamy,
+                fizzy: found.fizzy,
+              }
+            : null,
+        };
+      }),
+  }));
 }
