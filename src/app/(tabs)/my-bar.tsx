@@ -1,4 +1,4 @@
-import { StatCard } from "@/components/bar/StatCard";
+import { StatCard } from "@/components/card/StatCard";
 import { Button } from "@/components/controls/Button";
 import { FeatureTile } from "@/components/controls/Tile/FeatureTile";
 import { InventoryTile } from "@/components/controls/Tile/InventoryTile";
@@ -9,13 +9,15 @@ import { NavRow } from "@/components/primitivies/NavRow";
 import { useAuth } from "@/hooks/useAuth";
 import { getBarItems, removeFromBar, type BarItem } from "@/services/bar";
 import { alcoholTypeLabel, loadCatalog } from "@/services/catalog";
+import { getMakeableCocktails } from "@/services/cocktails";
 import { colors, spacing } from "@/styles";
 import { fonts, radius } from "@/styles/tokens";
 import { BAR_CATEGORIES } from "@/types/bottle";
+import { Cocktail } from "@/types/cocktail";
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
 import { Plus, ScanLine } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -35,20 +37,19 @@ export default function MyBar() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string>();
   const [editing, setEditing] = useState(false);
-  // The last removed bottle, kept for a few seconds so it can be undone.
-  const [removed, setRemoved] = useState<BarItem | null>(null);
-  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // TODO: replace with your recipe matching against CocktailDB.
-  const drinkCount: number | null = null;
+  const [cocktails, setCocktails] = useState<Cocktail[] | null>(null);
 
   const load = useCallback(async () => {
     if (!user) return;
     try {
       setError(undefined);
-      // The catalog has the labels for alcohol types added in the database.
-      const [bar] = await Promise.all([getBarItems(user.id), loadCatalog()]);
+      const [bar, , makeable] = await Promise.all([
+        getBarItems(user.id),
+        loadCatalog(),
+        getMakeableCocktails(),
+      ]);
       setItems(bar);
+      setCocktails(makeable);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't load your bar.");
     } finally {
@@ -57,7 +58,6 @@ export default function MyBar() {
     }
   }, [user]);
 
-  // Reloads when the tab opens and when the add-bottle flow closes.
   useFocusEffect(
     useCallback(() => {
       load();
@@ -75,9 +75,9 @@ export default function MyBar() {
 
   const commit = async (item: BarItem) => {
     if (!user) return;
-
     try {
       await removeFromBar(user.id, item.id);
+      setCocktails(await getMakeableCocktails());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't remove it.");
       load();
@@ -91,10 +91,9 @@ export default function MyBar() {
 
     setItems((all) => all.filter((i) => i.id !== item.id));
 
-    setRemoved(item);
+    // setRemoved(item);
   };
 
-  // Leaving the screen: stop editing. Pending deletes still go through.
   useFocusEffect(useCallback(() => () => setEditing(false), []));
   useEffect(() => {
     if (items.length === 0) setEditing(false);
@@ -147,8 +146,7 @@ export default function MyBar() {
         />
 
         {/* Drink count */}
-        <StatCard drinkCount={drinkCount} />
-
+        <StatCard cocktails={cocktails} hasBottles={items.length > 0} />
         <NavRow
           title="Scan bottles"
           subtitle="Point your camera at your shelf"

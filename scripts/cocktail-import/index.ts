@@ -19,6 +19,7 @@ import { createClient } from "@supabase/supabase-js";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { BUILT_IN_INGREDIENTS as BAR_INGREDIENTS } from "../../src/data/ingredients";
 import {
   computeFlavor,
   DIMENSIONS,
@@ -110,20 +111,59 @@ async function fetchAllDrinks(): Promise<RawDrink[]> {
   }
 
   const byId = new Map<string, RawDrink>();
-  const letters = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
 
+  // 1. Full records by first letter. The free key caps each letter at 25.
+  const letters = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
   for (const letter of letters) {
-    const drinks = await getJson(`${API}/search.php?f=${letter}`);
-    for (const d of drinks?.drinks ?? []) byId.set(d.idDrink, d);
-    process.stdout.write(`\r  fetched "${letter}" – ${byId.size} drinks`);
+    const res = await getJson(`${API}/search.php?f=${letter}`);
+    for (const d of drinksOf(res)) byId.set(d.idDrink!, d);
+    process.stdout.write(`\r  letters: "${letter}" – ${byId.size} drinks`);
     await sleep(300);
   }
   console.log();
 
-  mkdirSync(CACHE_DIR, { recursive: true });
+  // 2. Collect IDs through the filter endpoints to find what step 1 missed.
+  const ids = new Set<string>();
+  const filters: [param: string, field: string][] = [
+    ["i", "strIngredient1"],
+    ["c", "strCategory"],
+    ["g", "strGlass"],
+    ["a", "strAlcoholic"],
+  ];
+  for (const [param, field] of filters) {
+    const list = await getJson(`${API}/list.php?${param}=list`);
+    for (const row of drinksOf(list)) {
+      const value = row[field];
+      if (!value) continue;
+      const res = await getJson(
+        `${API}/filter.php?${param}=${encodeURIComponent(value)}`,
+      );
+      for (const d of drinksOf(res)) if (d.idDrink) ids.add(d.idDrink);
+      process.stdout.write(`\r  filter ${param}: ${ids.size} ids`);
+      await sleep(300);
+    }
+  }
+  console.log();
+
+  // 3. Full record for every ID the letter search didn't return.
+  const missing = [...ids].filter((id) => !byId.has(id));
+  for (const [n, id] of missing.entries()) {
+    const res = await getJson(`${API}/lookup.php?i=${id}`);
+    const d = drinksOf(res)[0];
+    if (d?.idDrink) byId.set(d.idDrink, d);
+    process.stdout.write(`\r  lookups: ${n + 1}/${missing.length}`);
+    await sleep(300);
+  }
+  console.log(`\n  ${byId.size} drinks total (${missing.length} via lookup)`);
+
   const all = [...byId.values()];
   writeFileSync(CACHE_FILE, JSON.stringify(all));
   return all;
+}
+
+// The API returns {drinks: null} or {drinks: "None Found"} for no results.
+function drinksOf(res: any): RawDrink[] {
+  return Array.isArray(res?.drinks) ? res.drinks : [];
 }
 
 async function getJson(url: string, tries = 4): Promise<any> {
@@ -275,6 +315,29 @@ async function importDrinks() {
     check(error, "seed ingredients");
   });
   for (const r of INGREDIENT_SEED) known.add(r.key);
+
+  // Shelf, alcohol type, label and swatch of the built-in bar list are owned
+  // by src/data/ingredients.ts, so they're synced even on reviewed rows.
+  // Ingredients people added in the app aren't touched.
+  const missing = BAR_INGREDIENTS.filter((b) => !known.has(b.key));
+  if (missing.length > 0) {
+    throw new Error(
+      `No ingredients row for: ${missing.map((b) => b.name).join(", ")}. ` +
+        `Add them to ingredient-seed.ts.`,
+    );
+  }
+  for (const b of BAR_INGREDIENTS) {
+    const { error } = await db
+      .from("ingredients")
+      .update({
+        bar_category: b.category,
+        alcohol_type: b.alcoholType ?? null,
+        bar_label: b.label,
+        swatch: b.swatch,
+      })
+      .eq("key", b.key);
+    check(error, `bar fields for ${b.key}`);
+  }
 
   const unknown = new Map<string, string>();
   for (const { lines } of parsed) {

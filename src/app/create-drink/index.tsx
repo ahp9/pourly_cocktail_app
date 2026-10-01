@@ -1,4 +1,5 @@
 import { Header } from "@/components/layout/Header";
+import { AppText } from "@/components/primitivies/AppText";
 import { useProfile } from "@/hooks/useProfile";
 import { colors, spacing } from "@/styles";
 import { RefreshControl, ScrollView, StyleSheet } from "react-native";
@@ -19,7 +20,13 @@ export default function SelectIngredients() {
           />
         }
       >
-        <Header title="Discover" subtitle="Find new cocktails to try." />
+        <Header
+          title="Choose flavours/Liqours"
+          subtitle="What do you want to be in it?"
+        />
+        <AppText variant="body" color="cream2" align="center">
+          TODO{" "}
+        </AppText>
       </ScrollView>
     </SafeAreaView>
   );

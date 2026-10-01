@@ -1,8 +1,11 @@
 import { Button } from "@/components/controls/Button";
 import { Header } from "@/components/layout/Header";
 import { AppText } from "@/components/primitivies/AppText";
+import { RecommendationList } from "@/components/profile/RecommendationList";
+import { TasteProfileCard } from "@/components/profile/TasteProfileCard";
 import { useProfile } from "@/hooks/useProfile";
 import { colors, spacing } from "@/styles";
+import { router } from "expo-router";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -53,43 +56,18 @@ export default function ProfileScreen() {
           subtitle="Pourly is learning what you like."
         />
 
-        {profile.taste.length > 0 ? (
-          profile.taste.map((t) => (
-            <AppText key={t.key} variant="label">
-              {t.label} · {t.value}%
-            </AppText>
-          ))
-        ) : (
-          <AppText variant="body" color="cream2">
-            Rate a few drinks to build your taste profile.
-          </AppText>
-        )}
-
         {profile.personality ? (
           <AppText variant="title" color="amberLight">
             {profile.personality.name}
           </AppText>
-        ) : (
-          <Button
-            label="Add personality"
-            variant="secondary"
-            onPress={() => {
-              // TODO: navigate to the personality flow
-            }}
-          />
-        )}
+        ) : null}
 
-        {profile.recommendations.length > 0 ? (
-          profile.recommendations.map((r) => (
-            <AppText key={r.id} variant="label">
-              {r.name} · {r.match}%
-            </AppText>
-          ))
-        ) : (
-          <AppText variant="body" color="cream2">
-            No recommendations yet.
-          </AppText>
-        )}
+        <TasteProfileCard
+          taste={profile.taste}
+          onEdit={() => router.push("/add-personality")}
+        />
+
+        <RecommendationList items={profile.recommendations} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -101,7 +79,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sp24,
     paddingTop: spacing.sp16,
     paddingBottom: spacing.sp120,
-    gap: spacing.sp16,
+    gap: spacing.sp24,
   },
   center: {
     flex: 1,

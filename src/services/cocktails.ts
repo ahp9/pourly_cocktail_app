@@ -292,3 +292,11 @@ export async function addIngredients(
       }),
   }));
 }
+
+export async function getMakeableCocktails(): Promise<Cocktail[]> {
+  const { data, error } = await supabase.rpc("makeable_cocktails").select("*");
+  if (error) throw error;
+
+  const cocktails = await addIngredients((data ?? []) as CocktailRow[]);
+  return cocktails;
+}

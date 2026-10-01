@@ -1,4 +1,4 @@
-import { getRandomCocktails } from "@/services/cocktails";
+import { getCocktail, getRandomCocktails } from "@/services/cocktails";
 import type { Cocktail } from "@/types/cocktail";
 import { useCallback, useEffect, useState } from "react";
 
@@ -29,4 +29,39 @@ export function useRandomCocktails(count: number) {
   }, [load]);
 
   return { cocktails, loading, refreshing, error, refetch };
+}
+
+// One cocktail by id, with its ingredients.
+export function useCocktail(id: string | undefined) {
+  const [cocktail, setCocktail] = useState<Cocktail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+
+    setLoading(true);
+    getCocktail(id)
+      .then((c) => {
+        if (!cancelled) {
+          setCocktail(c);
+          setError(null);
+        }
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Couldn't load cocktail.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  return { cocktail, loading, error };
 }

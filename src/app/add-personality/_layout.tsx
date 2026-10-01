@@ -1,12 +1,12 @@
-import { AddBottleProvider } from "@/hooks/useAddBottle";
+import { AddPersonalityProvider } from "@/hooks/useAddPersonality";
 import { colors } from "@/styles/tokens";
 import { Stack } from "expo-router";
 
 // Full-screen flow opened from My Bar. Registered in app/_layout.tsx,
 // outside (tabs), so the nav bar is hidden.
-export default function AddBottleLayout() {
+export default function AddPersonalityLayout() {
   return (
-    <AddBottleProvider>
+    <AddPersonalityProvider>
       <Stack
         screenOptions={{
           headerShown: false,
@@ -15,11 +15,7 @@ export default function AddBottleLayout() {
         }}
       >
         <Stack.Screen name="index" />
-        <Stack.Screen name="scan" options={{ animation: "fade" }} />
-        <Stack.Screen name="confirm" />
-        <Stack.Screen name="new-ingredient" />
-        <Stack.Screen name="can-make" />
       </Stack>
-    </AddBottleProvider>
+    </AddPersonalityProvider>
   );
 }

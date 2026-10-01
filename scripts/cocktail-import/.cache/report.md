@@ -1,44 +1,72 @@
 # Cocktail import report
 
-441 cocktails, 341 ingredients.
+628 cocktails, 376 ingredients.
 
-## Ingredients with no flavour data (104)
+## Ingredients with no flavour data (138)
 Tag these in `ingredient-seed.ts` or the `ingredients` table, most-used first.
 
-- yoghurt — 8 cocktails
+- yoghurt — 9 cocktails
+- coconut liqueur — 6 cocktails
+- food coloring — 6 cocktails
+- banana liqueur — 5 cocktails
+- wine — 5 cocktails
 - wild turkey — 4 cocktails
+- kool-aid — 4 cocktails
+- root beer — 4 cocktails
+- fruit — 3 cocktails
+- chocolate ice-cream — 3 cocktails
+- mountain dew — 3 cocktails
 - blackberry brandy — 3 cocktails
-- wine — 3 cocktails
+- corona — 3 cocktails
+- surge — 3 cocktails
 - condensed milk — 3 cocktails
-- kool-aid — 3 cocktails
-- coconut liqueur — 3 cocktails
+- grain alcohol — 3 cocktails
+- schweppes russchian — 3 cocktails
 - cardamom — 3 cocktails
-- root beer — 3 cocktails
-- corona — 2 cocktails
-- surge — 2 cocktails
-- banana liqueur — 2 cocktails
+- godiva liqueur — 3 cocktails
+- fruit juice — 2 cocktails
+- pisang ambon — 2 cocktails
+- bitter lemon — 2 cocktails
+- apple cider — 2 cocktails
+- wormwood — 2 cocktails
 - vanilla — 2 cocktails
 - chocolate liqueur — 2 cocktails
+- almond flavoring — 2 cocktails
 - peach bitters — 2 cocktails
 - fruit punch — 2 cocktails
 - hot damn — 2 cocktails
-- fruit — 2 cocktails
 - peach vodka — 2 cocktails
 - grape juice — 2 cocktails
 - sherbet — 2 cocktails
-- schweppes russchian — 2 cocktails
+- iced tea — 2 cocktails
+- absolut kurant — 2 cocktails
 - rosemary syrup — 2 cocktails
 - rosemary — 2 cocktails
+- grape soda — 2 cocktails
 - orange curacao — 2 cocktails
+- raspberry vodka — 2 cocktails
 - jim beam — 2 cocktails
+- coriander — 2 cocktails
+- melon liqueur — 2 cocktails
+- peachtree schnapps — 2 cocktails
 - zima — 2 cocktails
-- pisang ambon — 1 cocktails
+- dark creme de cacao — 2 cocktails
+- strawberry liqueur — 2 cocktails
+- angelica root — 2 cocktails
+- anise — 2 cocktails
+- berries — 2 cocktails
+- figs — 1 cocktails
+- thyme — 1 cocktails
+- apricot nectar — 1 cocktails
+- pomegranate juice — 1 cocktails
+- firewater — 1 cocktails
+- absolut peppar — 1 cocktails
+- dr. pepper — 1 cocktails
+- sarsaparilla — 1 cocktails
+- maui — 1 cocktails
 - creme de mure — 1 cocktails
-- wormwood — 1 cocktails
-- mountain dew — 1 cocktails
 - blackstrap rum — 1 cocktails
 - caramel coloring — 1 cocktails
-- almond flavoring — 1 cocktails
 - blackcurrant cordial — 1 cocktails
 - olive brine — 1 cocktails
 - demerara sugar — 1 cocktails
@@ -47,15 +75,6 @@ Tag these in `ingredient-seed.ts` or the `ingredients` table, most-used first.
 - dubonnet rouge — 1 cocktails
 - vanilla syrup — 1 cocktails
 - rose — 1 cocktails
-- figs — 1 cocktails
-- thyme — 1 cocktails
-- apricot nectar — 1 cocktails
-- pomegranate juice — 1 cocktails
-- firewater — 1 cocktails
-- absolut peppar — 1 cocktails
-- fruit juice — 1 cocktails
-- dr. pepper — 1 cocktails
-- sarsaparilla — 1 cocktails
 - sirup of roses — 1 cocktails
 - whisky — 1 cocktails
 - cherry juice — 1 cocktails
@@ -64,15 +83,11 @@ Tag these in `ingredient-seed.ts` or the `ingredients` table, most-used first.
 - corn syrup — 1 cocktails
 - butter — 1 cocktails
 - marshmallows — 1 cocktails
-- iced tea — 1 cocktails
 - coconut syrup — 1 cocktails
 - jello — 1 cocktails
 - mint syrup — 1 cocktails
 - tennessee whiskey — 1 cocktails
-- grain alcohol — 1 cocktails
 - kiwi liqueur — 1 cocktails
-- bitter lemon — 1 cocktails
-- absolut kurant — 1 cocktails
 - cranberry vodka — 1 cocktails
 - apfelkorn — 1 cocktails
 - papaya — 1 cocktails
@@ -83,7 +98,6 @@ Tag these in `ingredient-seed.ts` or the `ingredients` table, most-used first.
 - pina colada mix — 1 cocktails
 - daiquiri mix — 1 cocktails
 - oreo cookie — 1 cocktails
-- grape soda — 1 cocktails
 - blended scotch — 1 cocktails
 - ginger syrup — 1 cocktails
 - islay single malt scotch — 1 cocktails
@@ -91,78 +105,130 @@ Tag these in `ingredient-seed.ts` or the `ingredients` table, most-used first.
 - coffee brandy — 1 cocktails
 - lime vodka — 1 cocktails
 - black sambuca — 1 cocktails
-- raspberry vodka — 1 cocktails
 - ruby port — 1 cocktails
 - blood orange — 1 cocktails
-- godiva liqueur — 1 cocktails
 - cherries — 1 cocktails
 - fresca — 1 cocktails
-- coriander — 1 cocktails
 - rosso vermouth — 1 cocktails
-- melon liqueur — 1 cocktails
 - yukon jack — 1 cocktails
 - limeade — 1 cocktails
-- peachtree schnapps — 1 cocktails
-- dark creme de cacao — 1 cocktails
 - rumple minze — 1 cocktails
 - vanilla vodka — 1 cocktails
 - blueberry schnapps — 1 cocktails
 - roses sweetened lime juice — 1 cocktails
-- strawberry liqueur — 1 cocktails
+- erin cream — 1 cocktails
+- almond — 1 cocktails
+- marjoram leaves — 1 cocktails
+- hpnotiq — 1 cocktails
+- apricot — 1 cocktails
+- glycerine — 1 cocktails
+- cantaloupe — 1 cocktails
+- cornstarch — 1 cocktails
+- cranberries — 1 cocktails
+- guava juice — 1 cocktails
+- candy — 1 cocktails
+- grapes — 1 cocktails
+- blackcurrant squash — 1 cocktails
+- gold tequila — 1 cocktails
+- cherry grenadine — 1 cocktails
+- tropicana — 1 cocktails
+- licorice root — 1 cocktails
+- peppermint extract — 1 cocktails
+- fennel seeds — 1 cocktails
+- kirschwasser — 1 cocktails
+- kummel — 1 cocktails
+- raisins — 1 cocktails
+- carrot — 1 cocktails
+- caramel sauce — 1 cocktails
+- chocolate sauce — 1 cocktails
+- mini-snickers bars — 1 cocktails
+- chocolate milk — 1 cocktails
 
-## Bar ingredients nobody can add yet (121)
+## Bar ingredients nobody can add yet (158)
 These need a bottle, but no entry in `src/data/ingredients.ts` maps to them,
 so drinks using them can never show as makeable. Add the common ones to the app list
 and to `bar_keys`.
 
-- red wine — 9 cocktails
-- yoghurt — 8 cocktails
-- creme de cacao — 6 cocktails
+- red wine — 11 cocktails
+- apricot brandy — 10 cocktails
+- creme de cacao — 10 cocktails
+- yoghurt — 9 cocktails
+- benedictine — 8 cocktails
+- southern comfort — 8 cocktails
+- goldschlager — 7 cocktails
+- cherry brandy — 6 cocktails
+- coconut liqueur — 6 cocktails
+- food coloring — 6 cocktails
+- banana liqueur — 5 cocktails
 - port — 5 cocktails
-- apricot brandy — 5 cocktails
-- benedictine — 5 cocktails
+- wine — 5 cocktails
+- white creme de menthe — 5 cocktails
+- sherry — 5 cocktails
 - wild turkey — 4 cocktails
-- goldschlager — 4 cocktails
-- cherry brandy — 4 cocktails
-- sherry — 4 cocktails
+- kool-aid — 4 cocktails
+- butterscotch schnapps — 4 cocktails
+- creme de banane — 4 cocktails
+- root beer — 4 cocktails
+- fruit — 3 cocktails
+- chocolate ice-cream — 3 cocktails
+- mountain dew — 3 cocktails
 - blackberry brandy — 3 cocktails
-- southern comfort — 3 cocktails
-- wine — 3 cocktails
+- corona — 3 cocktails
+- surge — 3 cocktails
 - condensed milk — 3 cocktails
-- kool-aid — 3 cocktails
-- coconut liqueur — 3 cocktails
+- green creme de menthe — 3 cocktails
+- grain alcohol — 3 cocktails
+- schweppes russchian — 3 cocktails
 - cardamom — 3 cocktails
-- white creme de menthe — 3 cocktails
-- root beer — 3 cocktails
+- godiva liqueur — 3 cocktails
+- fruit juice — 2 cocktails
+- pisang ambon — 2 cocktails
+- bitter lemon — 2 cocktails
+- apple cider — 2 cocktails
+- wormwood — 2 cocktails
 - cherry heering — 2 cocktails
-- corona — 2 cocktails
-- surge — 2 cocktails
-- banana liqueur — 2 cocktails
 - vanilla — 2 cocktails
 - chocolate liqueur — 2 cocktails
+- almond flavoring — 2 cocktails
 - peach bitters — 2 cocktails
 - fruit punch — 2 cocktails
 - hot damn — 2 cocktails
-- fruit — 2 cocktails
 - peach vodka — 2 cocktails
-- green creme de menthe — 2 cocktails
 - grape juice — 2 cocktails
 - sherbet — 2 cocktails
-- schweppes russchian — 2 cocktails
+- iced tea — 2 cocktails
+- absolut kurant — 2 cocktails
 - rosemary syrup — 2 cocktails
 - rosemary — 2 cocktails
+- grape soda — 2 cocktails
 - orange curacao — 2 cocktails
+- raspberry vodka — 2 cocktails
+- advocaat — 2 cocktails
 - jim beam — 2 cocktails
-- creme de banane — 2 cocktails
+- coriander — 2 cocktails
+- melon liqueur — 2 cocktails
+- white wine — 2 cocktails
+- peachtree schnapps — 2 cocktails
 - zima — 2 cocktails
+- dark creme de cacao — 2 cocktails
+- strawberry liqueur — 2 cocktails
+- angelica root — 2 cocktails
+- anise — 2 cocktails
+- berries — 2 cocktails
+- apple schnapps — 2 cocktails
+- figs — 1 cocktails
+- thyme — 1 cocktails
+- apricot nectar — 1 cocktails
+- pomegranate juice — 1 cocktails
+- firewater — 1 cocktails
+- absolut peppar — 1 cocktails
+- dr. pepper — 1 cocktails
+- sarsaparilla — 1 cocktails
+- maui — 1 cocktails
 - strawberry schnapps — 1 cocktails
-- pisang ambon — 1 cocktails
 - creme de mure — 1 cocktails
-- wormwood — 1 cocktails
-- mountain dew — 1 cocktails
 - blackstrap rum — 1 cocktails
 - caramel coloring — 1 cocktails
-- almond flavoring — 1 cocktails
 - blackcurrant cordial — 1 cocktails
 - olive brine — 1 cocktails
 - demerara sugar — 1 cocktails
@@ -171,15 +237,6 @@ and to `bar_keys`.
 - dubonnet rouge — 1 cocktails
 - vanilla syrup — 1 cocktails
 - rose — 1 cocktails
-- figs — 1 cocktails
-- thyme — 1 cocktails
-- apricot nectar — 1 cocktails
-- pomegranate juice — 1 cocktails
-- firewater — 1 cocktails
-- absolut peppar — 1 cocktails
-- fruit juice — 1 cocktails
-- dr. pepper — 1 cocktails
-- sarsaparilla — 1 cocktails
 - sirup of roses — 1 cocktails
 - whisky — 1 cocktails
 - cherry juice — 1 cocktails
@@ -188,15 +245,11 @@ and to `bar_keys`.
 - corn syrup — 1 cocktails
 - butter — 1 cocktails
 - marshmallows — 1 cocktails
-- iced tea — 1 cocktails
 - coconut syrup — 1 cocktails
 - jello — 1 cocktails
 - mint syrup — 1 cocktails
 - tennessee whiskey — 1 cocktails
-- grain alcohol — 1 cocktails
 - kiwi liqueur — 1 cocktails
-- bitter lemon — 1 cocktails
-- absolut kurant — 1 cocktails
 - cranberry vodka — 1 cocktails
 - apfelkorn — 1 cocktails
 - papaya — 1 cocktails
@@ -207,8 +260,6 @@ and to `bar_keys`.
 - pina colada mix — 1 cocktails
 - daiquiri mix — 1 cocktails
 - oreo cookie — 1 cocktails
-- butterscotch schnapps — 1 cocktails
-- grape soda — 1 cocktails
 - blended scotch — 1 cocktails
 - ginger syrup — 1 cocktails
 - islay single malt scotch — 1 cocktails
@@ -216,34 +267,54 @@ and to `bar_keys`.
 - coffee brandy — 1 cocktails
 - lime vodka — 1 cocktails
 - black sambuca — 1 cocktails
-- raspberry vodka — 1 cocktails
 - ruby port — 1 cocktails
 - blood orange — 1 cocktails
-- advocaat — 1 cocktails
-- godiva liqueur — 1 cocktails
 - cherries — 1 cocktails
 - fresca — 1 cocktails
-- coriander — 1 cocktails
 - rosso vermouth — 1 cocktails
-- melon liqueur — 1 cocktails
 - yukon jack — 1 cocktails
 - limeade — 1 cocktails
-- white wine — 1 cocktails
-- peachtree schnapps — 1 cocktails
-- dark creme de cacao — 1 cocktails
 - rumple minze — 1 cocktails
 - vanilla vodka — 1 cocktails
 - blueberry schnapps — 1 cocktails
 - roses sweetened lime juice — 1 cocktails
-- strawberry liqueur — 1 cocktails
+- erin cream — 1 cocktails
+- almond — 1 cocktails
+- marjoram leaves — 1 cocktails
+- hpnotiq — 1 cocktails
+- apricot — 1 cocktails
+- glycerine — 1 cocktails
+- cantaloupe — 1 cocktails
+- cornstarch — 1 cocktails
+- cranberries — 1 cocktails
+- guava juice — 1 cocktails
+- candy — 1 cocktails
+- grapes — 1 cocktails
+- blackcurrant squash — 1 cocktails
+- gold tequila — 1 cocktails
+- cherry grenadine — 1 cocktails
+- tropicana — 1 cocktails
+- aquavit — 1 cocktails
+- licorice root — 1 cocktails
+- peppermint extract — 1 cocktails
+- fennel seeds — 1 cocktails
+- kirschwasser — 1 cocktails
+- kummel — 1 cocktails
+- raisins — 1 cocktails
+- carrot — 1 cocktails
+- caramel sauce — 1 cocktails
+- chocolate sauce — 1 cocktails
+- mini-snickers bars — 1 cocktails
+- chocolate milk — 1 cocktails
+- peppermint schnapps — 1 cocktails
 
 ## Sanity check: top 5 per dimension
 
-- **sweet**: Port And Starboard, Quick F**K, Oatmeal Cookie, Bumble Bee, Dirty Nipple
-- **sour**: Vodka Lemon, Gin Lemon, The Galah, Snowball, Lemon Elderflower Spritzer
-- **bitter**: Melya, Iced Coffee Fillip, Fuzzy Asshole, Irish Coffee, Hot Creamy Bush
-- **fruity**: Bora Bora, Pysch Vitamin Light, Afterglow, Kiwi Papaya Smoothie, Apello
+- **sweet**: Port And Starboard, Scottish Highland Liqueur, Amaretto Stinger, Bruce's Puce, Baby Guinness
+- **sour**: Vodka Lemon, Gin Lemon, The Galah, Amaretto Sour, Snowball
+- **bitter**: Spiking coffee, Melya, Iced Coffee Fillip, Swedish Coffee, Almond Chocolate Coffee
+- **fruity**: Mango Orange Smoothie, Bora Bora, Pysch Vitamin Light, Strawberry Shivers, Afterglow
 - **herbal**: Mauresque, Jewel Of The Nile, Derby, Pink Gin, Moranguito
-- **creamy**: Drinking Chocolate, Egg-Nog - Classic Cooked, Hot Chocolate to Die for, Chocolate Drink, Midnight Mint
-- **fizzy**: Coke and Drops, Radler, Bellini, Jack's Vanilla Coke, Kir
-- **strong**: A1, ABC, ACID, Artillery, B-53
+- **creamy**: Bailey's Dream Shake, Drinking Chocolate, Egg-Nog - Classic Cooked, Hot Chocolate to Die for, Boozy Snickers Milkshake
+- **fizzy**: Coke and Drops, Apricot punch, Arise My Love, Radler, Bellini
+- **strong**: Artillery, B-53, Bijou, Big Red, Bluebird

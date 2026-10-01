@@ -41,6 +41,33 @@ export type Flavor = {
   fizzy: number;
 };
 
+export type Taste = keyof Flavor;
+
+// Order and wording for flavour UI.
+export const TASTES: { key: Taste; label: string }[] = [
+  { key: "sweet", label: "Sweet" },
+  { key: "sour", label: "Sour" },
+  { key: "bitter", label: "Bitter" },
+  { key: "fruity", label: "Fruity" },
+  { key: "herbal", label: "Herbal" },
+  { key: "creamy", label: "Creamy" },
+  { key: "fizzy", label: "Fizzy" },
+];
+
+export const EMPTY_FLAVOR: Flavor = {
+  sweet: 0,
+  sour: 0,
+  bitter: 0,
+  fruity: 0,
+  herbal: 0,
+  creamy: 0,
+  fizzy: 0,
+};
+
+// All zeros means nobody has scored it yet.
+export const hasFlavor = (f: Flavor | null | undefined): f is Flavor =>
+  !!f && TASTES.some((t) => f[t.key] > 0);
+
 export interface Cocktail {
   id: string;
   name: string;

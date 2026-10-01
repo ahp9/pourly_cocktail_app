@@ -1,4 +1,5 @@
 import { supabase } from "@/services/supabase";
+import { TASTES, type Flavor } from "@/types/cocktail";
 import type { Profile, ProfileUser } from "@/types/profile";
 
 export async function getProfile(
@@ -52,4 +53,21 @@ export async function getProfile(
       accent: r.accent ?? "",
     })),
   };
+}
+
+// The user's own taste, from the personality flow. One taste_scores row per
+// taste, value 0..100 like the rest of the table. Needs a unique constraint
+// on (user_id, key) for the upsert.
+export async function saveTaste(userId: string, flavor: Flavor) {
+  const rows = TASTES.map((t) => ({
+    user_id: userId,
+    key: t.key,
+    label: t.label,
+    value: Math.round(flavor[t.key] * 100),
+  }));
+
+  const { error } = await supabase
+    .from("taste_scores")
+    .upsert(rows, { onConflict: "user_id,key" });
+  if (error) throw new Error(error.message);
 }
