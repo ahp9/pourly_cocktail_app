@@ -9,10 +9,12 @@ export function ChoiceGroup({
   title,
   hint,
   children,
+  multi,
 }: {
   title: string;
   hint?: string;
   children: ReactNode;
+  multi?: boolean; // more than one chip can be selected
 }) {
   return (
     <View style={{ gap: 10 }}>
@@ -24,7 +26,10 @@ export function ChoiceGroup({
           </AppText>
         ) : null}
       </View>
-      <View style={styles.wrap} accessibilityRole="radiogroup">
+      <View
+        style={styles.wrap}
+        accessibilityRole={multi ? undefined : "radiogroup"}
+      >
         {children}
       </View>
     </View>
@@ -35,18 +40,20 @@ export function Chip({
   label,
   selected,
   onPress,
+  multi,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
+  multi?: boolean; // one of several that can be selected at once
 }) {
   return (
     <PressableScale
       onPress={onPress}
       pressedScale={0.94}
-      accessibilityRole="radio"
+      accessibilityRole={multi ? "checkbox" : "radio"}
       accessibilityLabel={label}
-      accessibilityState={{ selected }}
+      accessibilityState={multi ? { checked: selected } : { selected }}
       style={[styles.chip, selected && styles.chipSelected]}
     >
       <AppText variant="label" color={selected ? "onAmber" : "cream"}>

@@ -1,12 +1,66 @@
+import { Button } from "@/components/controls/Button";
+import { Chip, ChoiceGroup } from "@/components/forms/Choices";
 import { Header } from "@/components/layout/Header";
 import { AppText } from "@/components/primitivies/AppText";
-import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
+import { getBarItems, type BarItem } from "@/services/bar";
 import { colors, spacing } from "@/styles";
-import { RefreshControl, ScrollView, StyleSheet } from "react-native";
+import { TASTES, type Taste } from "@/types/cocktail";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const labelFor = (item: BarItem) => item.product_name ?? item.label;
+
+// Adds the value if it's missing, removes it if it's there.
+const toggle = <T,>(list: T[], value: T) =>
+  list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+
 export default function SelectIngredients() {
-  const { profile, loading, refreshing, error, refetch } = useProfile();
+  const { user } = useAuth();
+  const [items, setItems] = useState<BarItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string>();
+
+  // Bottles are picked by ingredient key, flavours by taste.
+  const [bottles, setBottles] = useState<string[]>([]);
+  const [flavors, setFlavors] = useState<Taste[]>([]);
+
+  const load = useCallback(async () => {
+    if (!user) return;
+    try {
+      setError(undefined);
+      const bar = await getBarItems(user.id);
+      setItems(bar);
+      // Drop picks for bottles that are no longer in the bar.
+      setBottles((picked) =>
+        picked.filter((key) => bar.some((i) => i.ingredient_key === key)),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't load your bar.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [user]);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
+
+  const create = () => {
+    // TODO: build the drink from `bottles` and `flavors`.
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -15,18 +69,66 @@ export default function SelectIngredients() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={refetch}
+            onRefresh={() => {
+              setRefreshing(true);
+              load();
+            }}
             tintColor={colors.amber}
           />
         }
       >
         <Header
-          title="Choose flavours/Liqours"
+          title="Create a drink"
           subtitle="What do you want to be in it?"
         />
-        <AppText variant="body" color="cream2" align="center">
-          TODO{" "}
-        </AppText>
+
+        <ChoiceGroup title="Your bottles" hint="Pick what should go in." multi>
+          {loading ? (
+            <ActivityIndicator color={colors.amber} />
+          ) : error ? (
+            <View style={styles.message}>
+              <AppText variant="body" color="cream2">
+                {error}
+              </AppText>
+              <Button label="Try again" variant="secondary" onPress={load} />
+            </View>
+          ) : items.length === 0 ? (
+            <AppText variant="body" color="cream2">
+              Your bar is empty. Add a bottle first.
+            </AppText>
+          ) : (
+            items.map((item) => (
+              <Chip
+                key={item.id}
+                label={labelFor(item)}
+                selected={bottles.includes(item.ingredient_key)}
+                onPress={() =>
+                  setBottles((picked) => toggle(picked, item.ingredient_key))
+                }
+                multi
+              />
+            ))
+          )}
+        </ChoiceGroup>
+
+        <ChoiceGroup title="Flavors" hint="How should it taste?" multi>
+          {TASTES.map((taste) => (
+            <Chip
+              key={taste.key}
+              label={taste.label}
+              selected={flavors.includes(taste.key)}
+              onPress={() => setFlavors((picked) => toggle(picked, taste.key))}
+              multi
+            />
+          ))}
+        </ChoiceGroup>
+
+        <Button
+          label="Create"
+          fullWidth
+          onPress={create}
+          disabled={bottles.length === 0 && flavors.length === 0}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -38,6 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sp24,
     paddingTop: spacing.sp16,
     paddingBottom: spacing.sp120,
-    gap: spacing.sp16,
+    gap: spacing.sp24,
   },
+  message: { gap: spacing.sp12, alignItems: "flex-start" },
 });
