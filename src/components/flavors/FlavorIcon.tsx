@@ -1,4 +1,7 @@
-import { FlavorType, normalizeFlavor } from "@/components/flavors/flavorMapping";
+import {
+  FlavorType,
+  normalizeFlavor,
+} from "@/components/flavors/flavorMapping";
 import type { FlavorIconProps } from "@/types/flavors";
 import type { ComponentType } from "react";
 
@@ -10,7 +13,10 @@ import { HerbalIcon } from "@/components/flavors/HerbalIcon";
 import { SourIcon } from "@/components/flavors/SourIcon";
 import { SweetIcon } from "@/components/flavors/SweetIcon";
 
-export const FLAVOR_COMPONENTS: Record<FlavorType, ComponentType<FlavorIconProps>> = {
+export const FLAVOR_COMPONENTS: Record<
+  FlavorType,
+  ComponentType<FlavorIconProps>
+> = {
   sweet: SweetIcon,
   sour: SourIcon,
   bitter: BitterIcon,
@@ -25,6 +31,7 @@ export function FlavorIcon({
   flavor,
   ...props
 }: FlavorIconProps & { flavor: FlavorType | (string & {}) }) {
+  console.log("Rendering FlavorIcon", { flavor });
   const type = normalizeFlavor(flavor);
 
   if (!type) {

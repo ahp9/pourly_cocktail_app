@@ -34,7 +34,7 @@ export function CocktailCard({ cocktail }: { cocktail: Cocktail }) {
           label="View"
           variant="accent"
           size="secondarySmall"
-          onPress={() => router.push(`/cocktail/${cocktail.id}`)}
+          onPress={() => router.push(`/create-drink/${cocktail.id}`)}
         />
       </View>
     </View>

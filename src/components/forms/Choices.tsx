@@ -1,10 +1,14 @@
 import { AppText } from "@/components/primitivies/AppText";
 import { PressableScale } from "@/components/primitivies/PressableScale";
+import { spacing } from "@/styles/";
 import { colors, radius } from "@/styles/tokens";
 import { Check } from "lucide-react-native";
-import type { ReactNode } from "react";
-import { StyleSheet, View } from "react-native";
+import { createContext, useContext, useState, type ReactNode } from "react";
+import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import { FlavorIcon } from "../flavors/FlavorIcon";
+
+// Share the calculated chip width with children
+const ChipWidthContext = createContext<number | undefined>(undefined);
 
 export function ChoiceGroup({
   title,
@@ -15,8 +19,21 @@ export function ChoiceGroup({
   title: string;
   hint?: string;
   children: ReactNode;
-  multi?: boolean; // more than one chip can be selected
+  multi?: boolean;
 }) {
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  const gap = spacing.sp16;
+  const chipWidth = containerWidth > 0 ? (containerWidth - gap) / 2 : undefined;
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+
+    if (width !== containerWidth) {
+      setContainerWidth(width);
+    }
+  };
+
   return (
     <View style={{ gap: 10 }}>
       <View style={{ gap: 2 }}>
@@ -27,12 +44,16 @@ export function ChoiceGroup({
           </AppText>
         ) : null}
       </View>
-      <View
-        style={styles.wrap}
-        accessibilityRole={multi ? undefined : "radiogroup"}
-      >
-        {children}
-      </View>
+
+      <ChipWidthContext.Provider value={chipWidth}>
+        <View
+          style={styles.wrap}
+          onLayout={handleLayout}
+          accessibilityRole={multi ? undefined : "radiogroup"}
+        >
+          {children}
+        </View>
+      </ChipWidthContext.Provider>
     </View>
   );
 }
@@ -46,8 +67,10 @@ export function Chip({
   label: string;
   selected: boolean;
   onPress: () => void;
-  multi?: boolean; // one of several that can be selected at once
+  multi?: boolean;
 }) {
+  const chipWidth = useContext(ChipWidthContext);
+
   return (
     <PressableScale
       onPress={onPress}
@@ -55,16 +78,17 @@ export function Chip({
       accessibilityRole={multi ? "checkbox" : "radio"}
       accessibilityLabel={label}
       accessibilityState={multi ? { checked: selected } : { selected }}
-      style={[styles.chip, selected && styles.chipSelected]}
+      style={[
+        styles.chip,
+        chipWidth !== undefined && { width: chipWidth },
+        selected && styles.chipSelected,
+      ]}
     >
       <AppText variant="label" color={selected ? "onAmber" : "cream"}>
         {label}
       </AppText>
-      <FlavorIcon
-        name={label}
-        size={16}
-        color={selected ? "onAmber" : "cream"}
-      />
+
+      <FlavorIcon flavor={label} size={30} />
     </PressableScale>
   );
 }
@@ -82,6 +106,7 @@ export function Swatches({
     <>
       {choices.map((c) => {
         const selected = value === c;
+
         return (
           <PressableScale
             key={c}
@@ -97,7 +122,11 @@ export function Swatches({
             ]}
           >
             {selected ? (
-              <Check size={16} color={colors.onAmber} strokeWidth={2.5} />
+              <Check
+                size={spacing.sp16}
+                color={colors.onAmber}
+                strokeWidth={2.5}
+              />
             ) : null}
           </PressableScale>
         );
@@ -107,17 +136,30 @@ export function Swatches({
 }
 
 const styles = StyleSheet.create({
-  wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  wrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sp16,
+  },
+
   chip: {
     minHeight: 44,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.sp16,
     justifyContent: "center",
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.surface,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp8,
   },
-  chipSelected: { backgroundColor: colors.amber, borderColor: colors.amber },
+
+  chipSelected: {
+    backgroundColor: colors.amber,
+    borderColor: colors.amber,
+  },
+
   swatch: {
     width: 44,
     height: 44,
@@ -127,5 +169,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
   },
-  swatchSelected: { borderColor: colors.cream },
+
+  swatchSelected: {
+    borderColor: colors.cream,
+  },
 });

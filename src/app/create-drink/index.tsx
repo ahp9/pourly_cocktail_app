@@ -67,7 +67,7 @@ export default function SelectIngredients() {
         setCreateError("Nothing in your bar makes a drink yet.");
         return;
       }
-      router.push(`/cocktail/${best.cocktail.id}`);
+      router.push(`/create-drink/${best.cocktail.id}`);
     } catch (e) {
       setCreateError(
         e instanceof Error ? e.message : "Couldn't find a drink. Try again.",

@@ -38,6 +38,8 @@ export default function CocktailScreen() {
   const drinkColor =
     blendIngredientColors(cocktail.ingredients) ?? colors.drink.basil;
 
+  const create = () => router.push(`/create-drink/make/${cocktail.id}`);
+
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       {/* Top bar */}
@@ -112,11 +114,18 @@ export default function CocktailScreen() {
             ))}
           </View>
         </View>
+
+        <View>
+          <AppText variant="label">Instructions</AppText>
+          <AppText variant="body" color="cream2">
+            {cocktail.instructions}
+          </AppText>
+        </View>
       </ScrollView>
 
       {/* Actions */}
       <View style={styles.actions}>
-        <Button label="Make this drink" fullWidth onPress={() => {}} />
+        <Button label="Make this drink" fullWidth onPress={create} />
         <View style={styles.secondaryRow}>
           <View style={{ flex: 1 }}>
             <Button

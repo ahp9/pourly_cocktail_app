@@ -15,6 +15,7 @@ export default function CreateDrinkLayout() {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack.Screen name="[id]" options={{ animation: "fade" }} />
         <Stack.Screen name="surprise" />
       </Stack>
     </AddBottleProvider>
