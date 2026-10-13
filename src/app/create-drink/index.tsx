@@ -4,17 +4,12 @@ import { Header } from "@/components/layout/Header";
 import { AppText } from "@/components/primitivies/AppText";
 import { useAuth } from "@/hooks/useAuth";
 import { getBarItems, type BarItem } from "@/services/bar";
+import { findCocktails } from "@/services/create_cocktail";
 import { colors, spacing } from "@/styles";
 import { TASTES, type Taste } from "@/types/cocktail";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { RefreshControl, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const labelFor = (item: BarItem) => item.product_name ?? item.label;
@@ -58,8 +53,28 @@ export default function SelectIngredients() {
     }, [load]),
   );
 
-  const create = () => {
-    // TODO: build the drink from `bottles` and `flavors`.
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string>();
+
+  // Open the best match among the drinks the bar can make.
+  const create = async () => {
+    if (!user) return;
+    try {
+      setCreating(true);
+      setCreateError(undefined);
+      const [best] = await findCocktails(user.id, flavors);
+      if (!best) {
+        setCreateError("Nothing in your bar makes a drink yet.");
+        return;
+      }
+      router.push(`/cocktail/${best.cocktail.id}`);
+    } catch (e) {
+      setCreateError(
+        e instanceof Error ? e.message : "Couldn't find a drink. Try again.",
+      );
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
@@ -82,7 +97,7 @@ export default function SelectIngredients() {
           subtitle="What do you want to be in it?"
         />
 
-        <ChoiceGroup title="Your bottles" hint="Pick what should go in." multi>
+        {/* <ChoiceGroup title="Your bottles" hint="Pick what should go in." multi>
           {loading ? (
             <ActivityIndicator color={colors.amber} />
           ) : error ? (
@@ -109,7 +124,7 @@ export default function SelectIngredients() {
               />
             ))
           )}
-        </ChoiceGroup>
+        </ChoiceGroup> */}
 
         <ChoiceGroup title="Flavors" hint="How should it taste?" multi>
           {TASTES.map((taste) => (
@@ -127,8 +142,15 @@ export default function SelectIngredients() {
           label="Create"
           fullWidth
           onPress={create}
+          loading={creating}
           disabled={bottles.length === 0 && flavors.length === 0}
         />
+
+        {createError ? (
+          <AppText variant="body" color="cream2">
+            {createError}
+          </AppText>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

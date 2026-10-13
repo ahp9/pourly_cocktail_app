@@ -1,5 +1,5 @@
 import { supabase } from "@/services/supabase";
-import { TASTES, type Flavor } from "@/types/cocktail";
+import { EMPTY_FLAVOR, TASTES, type Flavor } from "@/types/cocktail";
 import type { Profile, ProfileUser } from "@/types/profile";
 
 export async function getProfile(
@@ -53,6 +53,23 @@ export async function getProfile(
       accent: r.accent ?? "",
     })),
   };
+}
+
+// The user's own taste as 0..1 per taste, or null if they haven't set one.
+export async function getTaste(userId: string): Promise<Flavor | null> {
+  const { data, error } = await supabase
+    .from("taste_scores")
+    .select("key, value")
+    .eq("user_id", userId);
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) return null;
+
+  const flavor: Flavor = { ...EMPTY_FLAVOR };
+  for (const { key } of TASTES) {
+    const row = data.find((r) => r.key === key);
+    if (row) flavor[key] = row.value / 100;
+  }
+  return flavor;
 }
 
 // The user's own taste, from the personality flow. One taste_scores row per

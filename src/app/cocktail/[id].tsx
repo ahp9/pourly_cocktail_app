@@ -104,7 +104,10 @@ export default function CocktailScreen() {
                 style={[base.chip, styles.chip]}
               >
                 <Check size={14} color={colors.drink.basil} strokeWidth={2} />
-                <AppText variant="label">{i.name}</AppText>
+                <AppText variant="label">
+                  {i.name}
+                  {i.kind === "garnish" ? " (Garnish)" : ""}
+                </AppText>
               </View>
             ))}
           </View>
@@ -162,13 +165,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: layout.screenGutter,
-    paddingTop: spacing.sp8,
+    paddingTop: spacing.sp16,
   },
   topBarSpacer: { width: 44 },
 
   content: {
     paddingHorizontal: layout.screenGutter,
     paddingBottom: spacing.sp24,
+    paddingTop: spacing.sp16,
     gap: spacing.sp24,
   },
 

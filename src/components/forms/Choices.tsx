@@ -4,6 +4,7 @@ import { colors, radius } from "@/styles/tokens";
 import { Check } from "lucide-react-native";
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
+import { FlavorIcon } from "../flavors/FlavorIcon";
 
 export function ChoiceGroup({
   title,
@@ -59,6 +60,11 @@ export function Chip({
       <AppText variant="label" color={selected ? "onAmber" : "cream"}>
         {label}
       </AppText>
+      <FlavorIcon
+        name={label}
+        size={16}
+        color={selected ? "onAmber" : "cream"}
+      />
     </PressableScale>
   );
 }
